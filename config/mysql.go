@@ -21,7 +21,7 @@ func (m MYSQLDrive) Connect(key string, options interface{}, app interface{}) er
 	num := typeInfo.NumField()
 	for i := 0; i < num; i++ {
 		switch typeInfo.Field(i).Name {
-		case "Name":
+		case "Host":
 			m.Host = valInfo.Field(i).String()
 			break
 		case "Port":
