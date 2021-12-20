@@ -1,4 +1,4 @@
-module pkg
+module github.com/hr3685930/pkg
 
 go 1.17
 
