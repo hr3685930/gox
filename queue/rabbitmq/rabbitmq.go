@@ -8,7 +8,7 @@ import (
 	"github.com/aaronjan/hunch"
 	"github.com/golang-module/carbon"
 	"github.com/streadway/amqp"
-	"sts/pkg/queue"
+	"github.com/hr3685930/pkg/queue"
 	"time"
 )
 

@@ -3,8 +3,8 @@ package config
 import (
 	"reflect"
 	"strconv"
-	"sts/pkg/cache"
-	"sts/pkg/cache/redis"
+	"github.com/hr3685930/pkg/cache"
+	"github.com/hr3685930/pkg/cache/redis"
 )
 
 type RedisDrive struct {

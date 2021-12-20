@@ -2,8 +2,8 @@ package config
 
 import (
 	"reflect"
-	"sts/pkg/cache"
-	"sts/pkg/cache/sync"
+	"github.com/hr3685930/pkg/cache"
+	"github.com/hr3685930/pkg/cache/sync"
 )
 
 type SyncDrive struct {

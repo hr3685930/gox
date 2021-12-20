@@ -2,8 +2,8 @@ package config
 
 import (
 	"reflect"
-	"sts/pkg/queue"
-	"sts/pkg/queue/rabbitmq"
+	"github.com/hr3685930/pkg/queue"
+	"github.com/hr3685930/pkg/queue/rabbitmq"
 )
 
 type RabbitMQDrive struct {

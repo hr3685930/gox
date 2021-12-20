@@ -1,9 +1,9 @@
 package config
 
 import (
+	"github.com/hr3685930/pkg/db"
+	"github.com/hr3685930/pkg/db/mysql"
 	"reflect"
-	"sts/pkg/db"
-	"sts/pkg/db/mysql"
 )
 
 type MYSQLDrive struct {

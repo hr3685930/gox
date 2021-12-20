@@ -1,7 +1,7 @@
 package queue
 
 import (
-	"sts/pkg/db"
+	"github.com/hr3685930/pkg/db"
 	"sync"
 )
 
