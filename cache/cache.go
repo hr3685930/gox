@@ -1,6 +1,7 @@
 package cache
 
 import (
+    "context"
     "sync"
     "time"
 )
@@ -19,21 +20,21 @@ func GetCache(c string) Cache {
 
 type Cache interface {
     // Contains check if a cached key exists
-    Contains(key string) bool
+    Contains(ctx context.Context, key string) bool
 
     // Delete remove the cached key
-    Delete(key string) error
+    Delete(ctx context.Context, key string) error
 
     // Fetch retrieve the cached key value
-    Fetch(key string) (string, error)
+    Fetch(ctx context.Context, key string) (string, error)
 
     // FetchMulti retrieve multiple cached keys value
-    FetchMulti(keys []string) map[string]string
+    FetchMulti(ctx context.Context, keys []string) map[string]string
 
     // Flush remove all cached keys
-    Flush() error
+    Flush(ctx context.Context) error
 
     // Save cache a value by key
-    Save(key string, value string, lifeTime time.Duration) error
+    Save(ctx context.Context, key string, value string, lifeTime time.Duration) error
 }
 

@@ -1,14 +1,15 @@
 package redis
 
 import (
+    "context"
     "net"
     "time"
 
-    rd "gopkg.in/redis.v4"
+    rd "github.com/go-redis/redis/v8"
 )
 
 type Redis struct {
-    rd.BaseCmdable
+    *rd.Client
 }
 
 // New creates an instance of Redis cache driver
@@ -27,26 +28,29 @@ func New(addr, port string, db int, pass string) (*Redis, error) {
 }
 
 // Contains checks if cached key exists in Redis storage
-func (r *Redis) Contains(key string) bool {
-    status, _ := r.Exists(key).Result()
-    return status
+func (r *Redis) Contains(ctx context.Context, key string) bool {
+    status, _ := r.Exists(ctx, key).Result()
+    if status > 0 {
+        return true
+    }
+    return false
 }
 
 // Delete the cached key from Redis storage
-func (r *Redis) Delete(key string) error {
-    return r.Del(key).Err()
+func (r *Redis) Delete(ctx context.Context, key string) error {
+    return r.Del(ctx, key).Err()
 }
 
 // Fetch retrieves the cached value from key of the Redis storage
-func (r *Redis) Fetch(key string) (string, error) {
-    return r.Get(key).Result()
+func (r *Redis) Fetch(ctx context.Context, key string) (string, error) {
+    return r.Get(ctx, key).Result()
 }
 
 // FetchMulti retrieves multiple cached value from keys of the Redis storage
-func (r *Redis) FetchMulti(keys []string) map[string]string {
+func (r *Redis) FetchMulti(ctx context.Context, keys []string) map[string]string {
     result := make(map[string]string)
 
-    items, err := r.MGet(keys...).Result()
+    items, err := r.MGet(ctx, keys...).Result()
     if err != nil {
         return result
     }
@@ -61,11 +65,11 @@ func (r *Redis) FetchMulti(keys []string) map[string]string {
 }
 
 // Flush removes all cached keys of the Redis storage
-func (r *Redis) Flush() error {
-    return r.FlushAll().Err()
+func (r *Redis) Flush(ctx context.Context) error {
+    return r.FlushAll(ctx).Err()
 }
 
 // Save a value in Redis storage by key
-func (r *Redis) Save(key string, value string, lifeTime time.Duration) error {
-    return r.Set(key, value, lifeTime).Err()
+func (r *Redis) Save(ctx context.Context, key string, value string, lifeTime time.Duration) error {
+    return r.Set(ctx, key, value, lifeTime).Err()
 }
