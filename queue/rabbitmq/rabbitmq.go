@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/aaronjan/hunch"
 	"github.com/golang-module/carbon"
-	"github.com/streadway/amqp"
 	"github.com/hr3685930/pkg/queue"
+	"github.com/streadway/amqp"
 	"time"
 )
 
@@ -221,7 +221,7 @@ func (r *RabbitMQ) Consumer(topic, queueBaseName string, base queue.JobBase, sle
 
 			// retry and delay
 			_, _ = hunch.Retry(ctx, int(retry)+1, func(ctx context.Context) (interface{}, error) {
-				err = base.Handler()
+				err := base.Handler()
 				if err != nil {
 					r.ExportErr(queue.Err(err), d)
 					time.Sleep(time.Second * time.Duration(sleep))

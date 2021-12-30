@@ -6,10 +6,10 @@ import (
 	"github.com/Shopify/sarama"
 	"github.com/aaronjan/hunch"
 	"github.com/golang-module/carbon"
+	"github.com/hr3685930/pkg/queue"
 	"github.com/rfyiamcool/go-timewheel"
 	"reflect"
 	"strings"
-	"github.com/hr3685930/pkg/queue"
 	"time"
 )
 
@@ -119,7 +119,7 @@ func (k *Kafka) Close() {
 }
 
 func (c *consumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error {
-	tw, _ := timewheel.NewTimeWheel(1 * time.Second, 360, timewheel.TickSafeMode())
+	tw, _ := timewheel.NewTimeWheel(1*time.Second, 360, timewheel.TickSafeMode())
 	c.TimeWheel = tw
 	c.TimeWheel.Start()
 	return nil
@@ -169,7 +169,7 @@ func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, cl
 		}
 
 		_, err = hunch.Retry(ctx, int(c.Retry)+1, func(ctx context.Context) (interface{}, error) {
-			err = c.Job.Handler()
+			err := c.Job.Handler()
 			if err != nil {
 				c.k.ExportErr(queue.Err(err), string(msg.Value), c.GroupID)
 				c.TimeWheel.Sleep(time.Duration(c.Sleep) * time.Second)
