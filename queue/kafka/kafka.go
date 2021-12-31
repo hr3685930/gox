@@ -72,22 +72,22 @@ func (k *Kafka) Producer(topic, queueBaseName string, message []byte, delay int3
 		return err
 	}
 	k.ProducerTopic = topic
+	msg := &sarama.ProducerMessage{}
+	msg.Topic = k.ProducerTopic
 	// 增加key,hash到同一partition保证顺序消费,但发生rebalance时也不能保证顺序性
 	// 避免发生rebalance的方法 1.不允许临时增加组下消费者 2.不允许更改partition数
-	key := topic + "_" + queueBaseName
+	if queueBaseName != "" {
+		msg.Key = sarama.StringEncoder(topic + "_" + queueBaseName)
+	}
+
 	var headers []sarama.RecordHeader
 	header := sarama.RecordHeader{
 		Key:   []byte("delay"),
 		Value: queue.Int32ToBytes(delay),
 	}
 	headers = append(headers, header)
-	msg := &sarama.ProducerMessage{
-		Topic:   k.ProducerTopic,
-		Headers: headers,
-		Key:     sarama.StringEncoder(key),
-		Value:   sarama.ByteEncoder(message),
-	}
-
+	msg.Headers = headers
+	msg.Value = sarama.ByteEncoder(message)
 	_, _, err = p.SendMessage(msg)
 	if err != nil {
 		return err
