@@ -41,9 +41,14 @@ func NewConsumer(topic string, consumers Consumers) {
 
 }
 
-func NewProducer(topic, queue string, message []byte, delay int32) error {
+// NewProducer 生产消息
+// @Params topic  kafka is topic|rabbitmq is exchange
+// @Params key  kafka is partition key|rabbitmq is queue name
+// @Params message send body
+// @Params delay 延迟
+func NewProducer(topic, key string, message []byte, delay int32) error {
 	mq := MQ.ProducerConnect()
-	return mq.Producer(topic, queue, message, delay)
+	return mq.Producer(topic, key, message, delay)
 }
 
 func AutoMigrate() {
