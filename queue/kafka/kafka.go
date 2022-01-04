@@ -143,9 +143,8 @@ func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, cl
 		for _, value := range msg.Headers {
 			headers[string(value.Key)] = queue.BytesToInt32(value.Value)
 		}
-		delay := headers["delay"].(int32)
 
-		if delay > 0 {
+		if delay, ok := headers["delay"].(int32); ok && delay > 0 {
 			jsonRes := msg.Value
 			// interface copy
 			msgHandler := reflect.New(reflect.ValueOf(c.Job).Elem().Type()).Interface().(queue.JobBase)
