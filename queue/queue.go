@@ -1,6 +1,9 @@
 package queue
 
-import "runtime/debug"
+import (
+	"fmt"
+	"github.com/pkg/errors"
+)
 
 type JobBase interface {
 	Handler() (queueErr *Error)
@@ -35,7 +38,7 @@ func (qe *Error) Error() string {
 func Err(err error) *Error {
 	return &Error{
 		s:     err.Error(),
-		stack: string(debug.Stack()),
+		stack: fmt.Sprintf("%+v\n", errors.New(err.Error())),
 	}
 }
 

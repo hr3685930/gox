@@ -2,15 +2,16 @@ package gin
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"net/http"
-	"runtime/debug"
 )
 
 var (
-	InternalError = NewError(http.StatusInternalServerError, 5500, http.StatusText(http.StatusInternalServerError), debug.Stack())
+	InternalError = NewError(http.StatusInternalServerError, 5500, http.StatusText(http.StatusInternalServerError))
 )
 
 type HttpError struct {
@@ -24,12 +25,12 @@ func (h *HttpError) Error() string {
 	return h.Msg
 }
 
-func NewError(statusCode, code int, msg string, stack []byte) *HttpError {
+func NewError(statusCode, code int, msg string) *HttpError {
 	return &HttpError{
 		HttpCode: statusCode,
 		Code:     code,
 		Msg:      msg,
-		Stack:    stack,
+		Stack:    []byte(fmt.Sprintf("%+v\n", errors.New(msg))),
 	}
 }
 
@@ -57,7 +58,7 @@ func ErrHandler(errorReport HTTPErrorReport) gin.HandlerFunc {
 					response["code"] = 4422
 					response["message"] = "validation_failed"
 					response["detail"] = Translate(e)
-					stack = string(debug.Stack())
+					stack = fmt.Sprintf("%+v\n", errors.New("validation_failed"))
 				} else {
 					response["code"] = InternalError.Code
 					response["message"] = InternalError.Msg

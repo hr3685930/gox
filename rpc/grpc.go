@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/golang/protobuf/ptypes/any"
+	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -61,10 +62,16 @@ func ErrorHandler(md metadata.MD, req interface{}, err error, errReport ErrorRep
 	return status.Error(s.Code(), s.Message())
 }
 
-func Err(code codes.Code, msg string, stack []byte) error {
+func Err(code codes.Code, msg string) error {
 	s := status.New(code, msg)
 	st, _ := s.WithDetails(&any.Any{
-		Value:  stack,
+		Value:  stack(msg),
 	})
 	return st.Err()
+}
+
+func stack(msg string) []byte {
+	stack := fmt.Sprintf("%+v\n", errors.New(msg))
+	fmt.Println(stack)
+	return []byte(stack)
 }

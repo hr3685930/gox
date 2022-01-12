@@ -6,10 +6,10 @@ import (
     "github.com/ddliu/go-httpclient"
     "github.com/go-playground/validator/v10"
     "github.com/labstack/echo"
+    "github.com/pkg/errors"
     "github.com/spf13/viper"
     "io/ioutil"
     "net/http"
-    "runtime/debug"
 )
 
 type HttpError struct {
@@ -38,7 +38,7 @@ func CustomHTTPErrorHandler(err error, c echo.Context) {
         msg  interface{}
     )
     var body string
-    stack := string(debug.Stack())
+    stack := fmt.Sprintf("%+v\n", errors.New("debug"))
     if he, ok := err.(*echo.HTTPError); ok {
         code = he.Code
         msg = echo.Map{
