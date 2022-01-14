@@ -63,11 +63,6 @@ func (g *Group) Wait() ([]interface{}, []error) {
 
 type SyncFunc func(ctx context.Context) (interface{}, error)
 
-type response struct {
-	res interface{}
-	err error
-}
-
 func All(ctx context.Context, fns ...SyncFunc) ([]interface{}, []error) {
 	rs := make([]interface{}, len(fns))
 	errs := make([]error, len(fns))
@@ -84,13 +79,10 @@ func All(ctx context.Context, fns ...SyncFunc) ([]interface{}, []error) {
 				}
 				wg.Done()
 			}()
-			defer wg.Done()
 
-			var r response
-			r.res, r.err = f(ctx)
-
-			rs[index] = r.res
-			errs[index] = r.err
+			res, err := f(ctx)
+			rs[index] = res
+			errs[index] = err
 		}(i, fn)
 	}
 
