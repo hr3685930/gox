@@ -1,4 +1,4 @@
-package concurrent
+package goo
 
 import (
 	"context"
