@@ -45,9 +45,9 @@ func Drive(driveEnv, app interface{}) error {
 	}
 	dOption := make([]reflect.Value, 1)
 	if defaultDrive != "" {
-		dOption[0] = reflect.ValueOf(defaultDrive)
+		dOption[0] = reflect.ValueOf(strings.ToLower(defaultDrive))
 	} else {
-		dOption[0] = reflect.ValueOf(typeInfo.Field(0).Name)
+		dOption[0] = reflect.ValueOf(strings.ToLower(typeInfo.Field(0).Name))
 	}
 	d := valInfo.Field(0).MethodByName("Default")
 	d.Call(dOption)
