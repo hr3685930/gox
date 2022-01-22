@@ -1,29 +1,29 @@
-package mysql
+package clickhouse
 
 import (
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/clickhouse"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"time"
 )
 
-type MysqlDB struct {
+type ClickHouseDB struct {
 	dsn   string
 	debug bool
 }
 
-func NewMysqlDB(dsn string, debug bool) *MysqlDB {
-	return &MysqlDB{dsn, debug}
+func NewClickHouseDB(dsn string, debug bool) *ClickHouseDB {
+	return &ClickHouseDB{dsn, debug}
 }
 
-func (m *MysqlDB) Connect() (error, *gorm.DB) {
-	dsn := m.dsn
+func (c *ClickHouseDB) Connect() (error, *gorm.DB) {
+	dsn := c.dsn
 	loglevel := logger.Error
-	if m.debug {
+	if c.debug {
 		loglevel = logger.Info
 	}
 
-	orm, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+	orm, err := gorm.Open(clickhouse.Open(dsn), &gorm.Config{
 		Logger:                 logger.Default.LogMode(loglevel),
 		SkipDefaultTransaction: true,
 		PrepareStmt:            true,
@@ -36,5 +36,4 @@ func (m *MysqlDB) Connect() (error, *gorm.DB) {
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 	return nil, orm
-
 }

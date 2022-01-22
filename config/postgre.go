@@ -2,23 +2,23 @@ package config
 
 import (
 	"github.com/hr3685930/pkg/db"
-	"github.com/hr3685930/pkg/db/mysql"
+	"github.com/hr3685930/pkg/db/postgre"
 	"reflect"
 )
 
-type MYSQLDrive struct {
+type PostgreDrive struct {
 	Dsn     string
 	App      App
 }
 
-func (m MYSQLDrive) Connect(key string, options interface{}, app interface{}) error {
+func (p PostgreDrive) Connect(key string, options interface{}, app interface{}) error {
 	var typeInfo = reflect.TypeOf(options)
 	var valInfo = reflect.ValueOf(options)
 	num := typeInfo.NumField()
 	for i := 0; i < num; i++ {
 		switch typeInfo.Field(i).Name {
 		case "Dsn":
-			m.Dsn = valInfo.Field(i).String()
+			p.Dsn = valInfo.Field(i).String()
 			break
 		}
 	}
@@ -28,19 +28,19 @@ func (m MYSQLDrive) Connect(key string, options interface{}, app interface{}) er
 	for i := 0; i < appTypeInfo.NumField(); i++ {
 		switch appTypeInfo.Field(i).Name {
 		case "Name":
-			m.App.Name = appValInfo.Field(i).String()
+			p.App.Name = appValInfo.Field(i).String()
 			break
 		case "Env":
-			m.App.Env = appValInfo.Field(i).String()
+			p.App.Env = appValInfo.Field(i).String()
 			break
 		case "Debug":
-			m.App.Debug = appValInfo.Field(i).Bool()
+			p.App.Debug = appValInfo.Field(i).Bool()
 			break
 		}
 	}
 
-	mysqlDB := mysql.NewMysqlDB(m.Dsn, m.App.Debug)
-	err, orm := mysqlDB.Connect()
+	postgreDB := postgre.NewPostgreDB(p.Dsn, p.App.Debug)
+	err, orm := postgreDB.Connect()
 	if err != nil {
 		return err
 	}
@@ -49,6 +49,6 @@ func (m MYSQLDrive) Connect(key string, options interface{}, app interface{}) er
 }
 
 
-func (m MYSQLDrive) Default(key string) {
+func (m PostgreDrive) Default(key string) {
 	db.Orm = db.GetConnect(key)
 }

@@ -2,16 +2,16 @@ package config
 
 import (
 	"github.com/hr3685930/pkg/db"
-	"github.com/hr3685930/pkg/db/mysql"
+	"github.com/hr3685930/pkg/db/clickhouse"
 	"reflect"
 )
 
-type MYSQLDrive struct {
+type ClickhouseDrive struct {
 	Dsn     string
 	App      App
 }
 
-func (m MYSQLDrive) Connect(key string, options interface{}, app interface{}) error {
+func (m ClickhouseDrive) Connect(key string, options interface{}, app interface{}) error {
 	var typeInfo = reflect.TypeOf(options)
 	var valInfo = reflect.ValueOf(options)
 	num := typeInfo.NumField()
@@ -39,8 +39,8 @@ func (m MYSQLDrive) Connect(key string, options interface{}, app interface{}) er
 		}
 	}
 
-	mysqlDB := mysql.NewMysqlDB(m.Dsn, m.App.Debug)
-	err, orm := mysqlDB.Connect()
+	clickhouseDB := clickhouse.NewClickHouseDB(m.Dsn, m.App.Debug)
+	err, orm := clickhouseDB.Connect()
 	if err != nil {
 		return err
 	}
@@ -49,6 +49,6 @@ func (m MYSQLDrive) Connect(key string, options interface{}, app interface{}) er
 }
 
 
-func (m MYSQLDrive) Default(key string) {
+func (m ClickhouseDrive) Default(key string) {
 	db.Orm = db.GetConnect(key)
 }

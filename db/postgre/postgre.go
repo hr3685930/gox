@@ -1,29 +1,29 @@
-package mysql
+package postgre
 
 import (
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 	"time"
 )
 
-type MysqlDB struct {
+type PostgreDB struct {
 	dsn   string
 	debug bool
 }
 
-func NewMysqlDB(dsn string, debug bool) *MysqlDB {
-	return &MysqlDB{dsn, debug}
+func NewPostgreDB(dsn string, debug bool) *PostgreDB {
+	return &PostgreDB{dsn, debug}
 }
 
-func (m *MysqlDB) Connect() (error, *gorm.DB) {
+func (m *PostgreDB) Connect() (error, *gorm.DB) {
 	dsn := m.dsn
 	loglevel := logger.Error
 	if m.debug {
 		loglevel = logger.Info
 	}
 
-	orm, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+	orm, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger:                 logger.Default.LogMode(loglevel),
 		SkipDefaultTransaction: true,
 		PrepareStmt:            true,

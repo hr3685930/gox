@@ -26,8 +26,13 @@ func Drive(driveEnv, app interface{}) error {
 	var typeInfo = reflect.TypeOf(driveEnv)
 	var valInfo = reflect.ValueOf(driveEnv)
 	num := typeInfo.NumField()
+	var defaultDrive string
 	for i := 0; i < num; i++ {
 		params := make([]reflect.Value, 3)
+		if typeInfo.Field(i).Name == "Default" {
+			defaultDrive = valInfo.Field(i).String()
+			continue
+		}
 		params[0] = reflect.ValueOf(typeInfo.Field(i).Name)
 		params[1] = valInfo.Field(i)
 		params[2] = reflect.ValueOf(app)
@@ -39,12 +44,15 @@ func Drive(driveEnv, app interface{}) error {
 		}
 	}
 	dOption := make([]reflect.Value, 1)
-	dOption[0] = reflect.ValueOf(typeInfo.Field(0).Name)
+	if defaultDrive != "" {
+		dOption[0] = reflect.ValueOf(defaultDrive)
+	} else {
+		dOption[0] = reflect.ValueOf(typeInfo.Field(0).Name)
+	}
 	d := valInfo.Field(0).MethodByName("Default")
 	d.Call(dOption)
 	return nil
 }
-
 
 // Load priority env > yaml > default
 func Load(e interface{}) error {
