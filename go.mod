@@ -26,7 +26,10 @@ require (
 	github.com/urfave/cli v1.22.5
 	go.uber.org/zap v1.19.1
 	google.golang.org/grpc v1.43.0
+	gorm.io/driver/clickhouse v0.2.2
 	gorm.io/driver/mysql v1.2.1
+	gorm.io/driver/postgres v1.2.3
+	gorm.io/driver/sqlite v1.2.6
 	gorm.io/gorm v1.22.4
 )
 
@@ -101,7 +104,4 @@ require (
 	google.golang.org/protobuf v1.27.1 // indirect
 	gopkg.in/ini.v1 v1.66.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	gorm.io/driver/clickhouse v0.2.2 // indirect
-	gorm.io/driver/postgres v1.2.3 // indirect
-	gorm.io/driver/sqlite v1.2.6 // indirect
 )

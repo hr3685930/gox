@@ -5,6 +5,7 @@ import (
 )
 
 type HTTPServer struct {
+	G     *gin.Engine
 	Debug bool
 }
 
@@ -12,7 +13,7 @@ func NewHTTPServer(debug bool) *HTTPServer {
 	return &HTTPServer{Debug: debug}
 }
 
-func (h *HTTPServer) HTTP(addr string, route func(e *gin.Engine)) error {
+func (h *HTTPServer) LoadRoute(route func(e *gin.Engine)) error {
 	if h.Debug {
 		gin.SetMode(gin.DebugMode)
 	} else {
@@ -23,5 +24,10 @@ func (h *HTTPServer) HTTP(addr string, route func(e *gin.Engine)) error {
 	}
 	g := gin.New()
 	route(g)
-	return g.Run(addr)
+	h.G = g
+	return nil
+}
+
+func (h *HTTPServer) Run(addr string) error {
+	return h.G.Run(addr)
 }

@@ -13,27 +13,29 @@ import (
 )
 
 type Grpc struct {
-	Address string
+	G     *grpc.Server
+	Debug bool
 }
 
-func NewGrpc(address string) *Grpc {
-	return &Grpc{Address: address}
+func NewGrpc(debug bool) *Grpc {
+	return &Grpc{Debug: debug}
 }
 
 func (g *Grpc) Register(opts []grpc.ServerOption, register func(s *grpc.Server)) error {
-	lis, err := net.Listen("tcp", g.Address)
-	if err != nil {
-		return err
-	}
 	s := grpc.NewServer(opts...)
 	register(s)
-	fmt.Println("grpc connect success! listen address: " + g.Address)
-	if err := s.Serve(lis); err != nil {
-		return err
-	}
+	g.G = s
 	return nil
 }
 
+func (g *Grpc) Run(addr string) error {
+	lis, err := net.Listen("tcp", addr)
+	if err != nil {
+		return err
+	}
+	fmt.Println("grpc connect success! listen address: " + addr)
+	return g.G.Serve(lis)
+}
 
 type ErrorReport func(md metadata.MD, req interface{}, stack string, resp *status.Status)
 
@@ -65,7 +67,7 @@ func ErrorHandler(md metadata.MD, req interface{}, err error, errReport ErrorRep
 func Err(code codes.Code, msg string) error {
 	s := status.New(code, msg)
 	st, _ := s.WithDetails(&any.Any{
-		Value:  stack(msg),
+		Value: stack(msg),
 	})
 	return st.Err()
 }
