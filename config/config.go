@@ -27,11 +27,9 @@ func Drive(driveEnv, app interface{}) error {
 	var valInfo = reflect.ValueOf(driveEnv)
 	num := typeInfo.NumField()
 	var defaultDrive string
-	var defaultDriveIndex int
 	for i := 0; i < num; i++ {
 		params := make([]reflect.Value, 3)
 		if typeInfo.Field(i).Name == "Default" {
-			defaultDriveIndex = i
 			defaultDrive = valInfo.Field(i).String()
 			continue
 		}
@@ -43,6 +41,13 @@ func Drive(driveEnv, app interface{}) error {
 		err := res[0].Interface()
 		if err != nil {
 			return res[0].Interface().(error)
+		}
+	}
+
+	var defaultDriveIndex int
+	for i := 0; i < num; i++ {
+		if typeInfo.Field(i).Name == defaultDrive {
+			defaultDriveIndex = i
 		}
 	}
 	dOption := make([]reflect.Value, 1)
