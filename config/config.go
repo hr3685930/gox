@@ -47,7 +47,7 @@ func Drive(driveEnv, app interface{}) error {
 
 	var defaultDriveIndex int
 	for i := 0; i < num; i++ {
-		if typeInfo.Field(i).Name == defaultDrive {
+		if strings.ToLower(typeInfo.Field(i).Name) == defaultDrive {
 			defaultDriveIndex = i
 		}
 	}
