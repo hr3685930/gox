@@ -27,11 +27,13 @@ func Drive(driveEnv, app interface{}) error {
 	var valInfo = reflect.ValueOf(driveEnv)
 	num := typeInfo.NumField()
 	var defaultDrive string
+	var defaultDriveIndex int
 	for i := 0; i < num; i++ {
 		params := make([]reflect.Value, 3)
 		if typeInfo.Field(i).Name == "Default" {
+			defaultDriveIndex = i
 			defaultDrive = valInfo.Field(i).String()
-			continue
+			return errors.New("缺少Default字段配置")
 		}
 		params[0] = reflect.ValueOf(typeInfo.Field(i).Name)
 		params[1] = valInfo.Field(i)
@@ -44,12 +46,8 @@ func Drive(driveEnv, app interface{}) error {
 		}
 	}
 	dOption := make([]reflect.Value, 1)
-	if defaultDrive != "" {
-		dOption[0] = reflect.ValueOf(strings.ToLower(defaultDrive))
-	} else {
-		dOption[0] = reflect.ValueOf(strings.ToLower(typeInfo.Field(0).Name))
-	}
-	d := valInfo.Field(0).MethodByName("Default")
+	dOption[0] = reflect.ValueOf(strings.ToLower(defaultDrive))
+	d := valInfo.Field(defaultDriveIndex).MethodByName("Default")
 	d.Call(dOption)
 	return nil
 }
