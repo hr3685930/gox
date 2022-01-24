@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"github.com/creasty/defaults"
 	"github.com/fatih/structs"
 	"github.com/jeremywohl/flatten"
@@ -50,10 +51,17 @@ func Drive(driveEnv, app interface{}) error {
 			defaultDriveIndex = i
 		}
 	}
+
+	fmt.Println(defaultDrive)
+	fmt.Println(defaultDriveIndex)
 	dOption := make([]reflect.Value, 1)
 	dOption[0] = reflect.ValueOf(strings.ToLower(defaultDrive))
 	d := valInfo.Field(defaultDriveIndex).MethodByName("Default")
-	d.Call(dOption)
+	r := d.Call(dOption)
+	err := r[0].Interface()
+	if err != nil {
+		return r[0].Interface().(error)
+	}
 	return nil
 }
 
