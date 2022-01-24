@@ -33,6 +33,7 @@ func Drive(driveEnv, app interface{}) error {
 		if typeInfo.Field(i).Name == "Default" {
 			defaultDriveIndex = i
 			defaultDrive = valInfo.Field(i).String()
+			continue
 		}
 		params[0] = reflect.ValueOf(typeInfo.Field(i).Name)
 		params[1] = valInfo.Field(i)
