@@ -33,7 +33,7 @@ func Drive(driveEnv, app interface{}) error {
 			defaultDrive = valInfo.Field(i).String()
 			continue
 		}
-		params[0] = reflect.ValueOf(typeInfo.Field(i).Name)
+		params[0] = reflect.ValueOf(strings.ToLower(typeInfo.Field(i).Name))
 		params[1] = valInfo.Field(i)
 		params[2] = reflect.ValueOf(app)
 		item := valInfo.Field(i).MethodByName("Connect")
