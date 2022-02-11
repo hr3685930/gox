@@ -18,6 +18,10 @@ func GetCache(c string) Cache {
     return nil
 }
 
+func AddTracingHook() {
+    Cached.AddTracingHook()
+}
+
 type Cache interface {
     // Contains check if a cached key exists
     Contains(ctx context.Context, key string) bool
@@ -36,5 +40,8 @@ type Cache interface {
 
     // Save cache a value by key
     Save(ctx context.Context, key string, value string, lifeTime time.Duration) error
+
+    //AddTracingHook Hook
+    AddTracingHook()
 }
 

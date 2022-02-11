@@ -119,3 +119,7 @@ func (sm *syncMap) Save(ctx context.Context, key string, value string, lifeTime 
 	sm.storage.Store(key, &syncMapItem{value, duration})
 	return nil
 }
+
+func (sm *syncMap) AddTracingHook() {
+
+}
