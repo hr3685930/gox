@@ -22,7 +22,7 @@ type Conf interface {
 	Default(key string)
 }
 
-func Drive(driveEnv, app interface{}) error {
+func Drive(driveEnv, app interface{}, ignoreErr bool) error {
 	var typeInfo = reflect.TypeOf(driveEnv)
 	var valInfo = reflect.ValueOf(driveEnv)
 	num := typeInfo.NumField()
@@ -39,7 +39,7 @@ func Drive(driveEnv, app interface{}) error {
 		item := valInfo.Field(i).MethodByName("Connect")
 		res := item.Call(params)
 		err := res[0].Interface()
-		if err != nil {
+		if err != nil && ignoreErr {
 			return res[0].Interface().(error)
 		}
 	}
