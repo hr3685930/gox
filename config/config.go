@@ -39,7 +39,7 @@ func Drive(driveEnv, app interface{}, ignoreErr bool) error {
 		item := valInfo.Field(i).MethodByName("Connect")
 		res := item.Call(params)
 		err := res[0].Interface()
-		if err != nil && ignoreErr {
+		if err != nil && !ignoreErr {
 			return res[0].Interface().(error)
 		}
 	}
