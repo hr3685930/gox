@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"github.com/hr3685930/pkg/db"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -18,7 +19,7 @@ func NewMysqlDB(dsn string, debug bool) *MysqlDB {
 
 func (m *MysqlDB) Connect() (error, *gorm.DB) {
 	dsn := m.dsn
-	loglevel := logger.Error
+	loglevel := db.DefaultLogLevel
 	if m.debug {
 		loglevel = logger.Info
 	}

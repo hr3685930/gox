@@ -1,6 +1,7 @@
 package clickhouse
 
 import (
+	"github.com/hr3685930/pkg/db"
 	"gorm.io/driver/clickhouse"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -18,7 +19,7 @@ func NewClickHouseDB(dsn string, debug bool) *ClickHouseDB {
 
 func (c *ClickHouseDB) Connect() (error, *gorm.DB) {
 	dsn := c.dsn
-	loglevel := logger.Error
+	loglevel := db.DefaultLogLevel
 	if c.debug {
 		loglevel = logger.Info
 	}

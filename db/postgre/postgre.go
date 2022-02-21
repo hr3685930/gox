@@ -1,6 +1,7 @@
 package postgre
 
 import (
+	"github.com/hr3685930/pkg/db"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -18,7 +19,7 @@ func NewPostgreDB(dsn string, debug bool) *PostgreDB {
 
 func (m *PostgreDB) Connect() (error, *gorm.DB) {
 	dsn := m.dsn
-	loglevel := logger.Error
+	loglevel := db.DefaultLogLevel
 	if m.debug {
 		loglevel = logger.Info
 	}

@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+	"github.com/hr3685930/pkg/db"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -16,7 +17,7 @@ func NewSqliteDB(debug bool) *SqliteDB {
 }
 
 func (m *SqliteDB) Connect() (error, *gorm.DB) {
-	loglevel := logger.Error
+	loglevel := db.DefaultLogLevel
 	if m.debug {
 		loglevel = logger.Info
 	}
