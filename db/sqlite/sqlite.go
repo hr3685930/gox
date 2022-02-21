@@ -18,9 +18,6 @@ func NewSqliteDB(debug bool) *SqliteDB {
 
 func (m *SqliteDB) Connect() (error, *gorm.DB) {
 	loglevel := db.DefaultLogLevel
-	if m.debug {
-		loglevel = logger.Info
-	}
 	orm, err := gorm.Open(sqlite.Open("sqlite.db"), &gorm.Config{
 		Logger:                 logger.Default.LogMode(loglevel),
 		SkipDefaultTransaction: true,

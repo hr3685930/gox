@@ -20,10 +20,6 @@ func NewPostgreDB(dsn string, debug bool) *PostgreDB {
 func (m *PostgreDB) Connect() (error, *gorm.DB) {
 	dsn := m.dsn
 	loglevel := db.DefaultLogLevel
-	if m.debug {
-		loglevel = logger.Info
-	}
-
 	orm, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger:                 logger.Default.LogMode(loglevel),
 		SkipDefaultTransaction: true,

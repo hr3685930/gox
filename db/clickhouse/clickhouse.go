@@ -20,10 +20,6 @@ func NewClickHouseDB(dsn string, debug bool) *ClickHouseDB {
 func (c *ClickHouseDB) Connect() (error, *gorm.DB) {
 	dsn := c.dsn
 	loglevel := db.DefaultLogLevel
-	if c.debug {
-		loglevel = logger.Info
-	}
-
 	orm, err := gorm.Open(clickhouse.Open(dsn), &gorm.Config{
 		Logger:                 logger.Default.LogMode(loglevel),
 		SkipDefaultTransaction: true,

@@ -20,10 +20,6 @@ func NewMysqlDB(dsn string, debug bool) *MysqlDB {
 func (m *MysqlDB) Connect() (error, *gorm.DB) {
 	dsn := m.dsn
 	loglevel := db.DefaultLogLevel
-	if m.debug {
-		loglevel = logger.Info
-	}
-
 	orm, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
 		Logger:                 logger.Default.LogMode(loglevel),
 		SkipDefaultTransaction: true,
