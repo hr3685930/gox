@@ -1,7 +1,6 @@
 package queue
 
 import (
-	"github.com/hr3685930/pkg/db"
 	"sync"
 )
 
@@ -30,7 +29,7 @@ type Consumer struct {
 type Consumers []*Consumer
 
 func NewConsumer(topic string, consumers Consumers) {
-	AutoMigrate()
+	ErrJob = make(chan FailedJobs, 1)
 	for _, consumer := range consumers {
 		consumer := consumer
 		go func() {
@@ -49,17 +48,4 @@ func NewConsumer(topic string, consumers Consumers) {
 func NewProducer(topic, key string, message []byte, delay int32) error {
 	mq := MQ.ProducerConnect()
 	return mq.Producer(topic, key, message, delay)
-}
-
-func AutoMigrate() {
-	_ = db.Orm.AutoMigrate(&FailedJobs{})
-	ErrJob = make(chan FailedJobs, 1)
-	go func() {
-		for {
-			select {
-			case failedJob := <-ErrJob:
-				db.Orm.Save(&failedJob)
-			}
-		}
-	}()
 }
