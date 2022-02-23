@@ -36,6 +36,10 @@ func (qe *Error) Error() string {
 }
 
 func Err(err error) *Error {
+	e, ok := err.(*Error)
+	if ok {
+		return e
+	}
 	return &Error{
 		s:     err.Error(),
 		stack: fmt.Sprintf("%+v\n", errors.New(err.Error())),
