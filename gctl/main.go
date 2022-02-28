@@ -22,6 +22,18 @@ func main() {
 			Name:  "trace",
 			Usage: "链路,支持jaeger",
 		},
+		cli.StringFlag{
+			Name:  "db",
+			Usage: "数据库,支持mysql,postgre,clickhouse",
+		},
+		cli.StringFlag{
+			Name:  "queue",
+			Usage: "队列,支持kafka,rabbitmq",
+		},
+		cli.StringFlag{
+			Name:  "cache",
+			Usage: "缓存,支持redis",
+		},
 	}
 	app.Commands = []cli.Command{
 		{

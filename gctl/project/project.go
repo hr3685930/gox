@@ -16,6 +16,9 @@ type Opt struct {
 	ProjectName string
 	IsSentry    bool
 	IsTrace     bool
+	QueueDrive  string
+	CacheDrive  string
+	DBDrive     string
 	ServiceType string
 }
 
@@ -47,6 +50,22 @@ func Create(c *cli.Context) {
 	opts.ServiceType = serviceType
 	opts.IsTrace = false
 	opts.IsSentry = false
+	opts.CacheDrive = "sync"
+	opts.QueueDrive = "local"
+	opts.DBDrive = "sqlite"
+
+	if c.String("cache") != "" {
+		opts.CacheDrive = c.String("cache")
+	}
+
+	if c.String("queue") != "" {
+		opts.QueueDrive = c.String("queue")
+	}
+
+	if c.String("db") != "" {
+		opts.DBDrive = c.String("db")
+	}
+
 	if c.String("err") == "sentry" {
 		opts.IsSentry = true
 	}
@@ -236,7 +255,7 @@ func CreateProject(opts *Opt, pwd string) {
 	isMod := CheckFile("go.mod")
 	if !isMod {
 		fmt.Println("mod文件不存在, 正在创建mod.go")
-		TryErr(ExecShell("go mod init "+opts.ProjectName))
+		TryErr(ExecShell("go mod init " + opts.ProjectName))
 	}
 
 	TryErr(ExecShell("go mod tidy -compat=1.17"))
