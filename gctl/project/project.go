@@ -10,7 +10,7 @@ import (
 )
 
 const TplDir = ".goo"
-const TplGitUrl = "https://github.com/hr3685930/goo-template"
+const TplGitUrl = "https://gitee.com/geekers/goo-template"
 
 type Opt struct {
 	ProjectName string
@@ -101,7 +101,6 @@ func CheckFile(filepath string) (exist bool) {
 	if fileInfo != nil && e == nil {
 		exist = true
 	} else if os.IsNotExist(e) {
-		fmt.Println(filepath, "文件不存在")
 		exist = false
 	}
 	return
@@ -229,20 +228,18 @@ func CreateProject(opts *Opt, pwd string) {
 	if isGitignore {
 		fmt.Println("you need add config.yaml\nsqlite.db\n to .gitignore")
 	} else {
-		fmt.Println("正在创建.gitignore")
+		fmt.Println("gitignore文件不存在, 正在创建gitignore")
 		SimpleCreate(pwd+"/.gitignore", TplDir+"/.gitignore.tpl", opts)
 	}
 
-
-	TryErr(ExecShell("cd "+pwd))
 	// 检查是否存在go.mod
 	isMod := CheckFile("go.mod")
 	if !isMod {
-		fmt.Println("正在创建go mod")
+		fmt.Println("mod文件不存在, 正在创建mod.go")
 		TryErr(ExecShell("go mod init "+opts.ProjectName))
 	}
 
-	TryErr(ExecShell("go mod tidy"))
+	TryErr(ExecShell("go mod tidy -compat=1.17"))
 }
 
 func ExecShell(shell string) error {
