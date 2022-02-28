@@ -233,6 +233,8 @@ func CreateProject(opts *Opt, pwd string) {
 		SimpleCreate(pwd+"/.gitignore", TplDir+"/.gitignore.tpl", opts)
 	}
 
+
+	TryErr(ExecShell("cd "+pwd))
 	// 检查是否存在go.mod
 	isMod := CheckFile("go.mod")
 	if !isMod {
