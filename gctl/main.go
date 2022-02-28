@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/hr3685930/pkg/ctl/project"
+	"github.com/hr3685930/pkg/gctl/project"
 	"github.com/urfave/cli"
 	"os"
 	"sort"

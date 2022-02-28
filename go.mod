@@ -30,7 +30,7 @@ require (
 	gorm.io/driver/mysql v1.2.1
 	gorm.io/driver/postgres v1.2.3
 	gorm.io/driver/sqlite v1.2.6
-	gorm.io/gorm v1.22.4
+	gorm.io/gorm v1.23.1
 )
 
 require (
@@ -67,7 +67,7 @@ require (
 	github.com/jcmturner/gokrb5/v8 v8.4.2 // indirect
 	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
-	github.com/jinzhu/now v1.1.3 // indirect
+	github.com/jinzhu/now v1.1.4 // indirect
 	github.com/joho/godotenv v1.3.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
