@@ -246,7 +246,7 @@ func CreateProject(opts *Opt, pwd string) {
 }
 
 func ExecShell(shell string) error {
-	cmd := exec.Command(shell)
+	cmd := exec.Command("/bin/bash", "-c", shell)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
 		return err
