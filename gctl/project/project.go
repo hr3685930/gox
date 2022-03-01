@@ -136,8 +136,8 @@ func CreateProject(opts *Opt, pwd string) {
 	apiDir := pwd + "/api"
 	TryErr(os.Mkdir(apiDir, os.ModePerm))
 	if opts.ServiceType == "rpc" {
-		TryErr(os.MkdirAll(apiDir+"/v1/example", os.ModePerm))
-		SimpleCreate(apiDir+"/v1/example/example.proto", TplDir+"/api/v1/example/example.proto", opts)
+		TryErr(os.MkdirAll(apiDir+"/proto/v1/example", os.ModePerm))
+		SimpleCreate(apiDir+"/proto/v1/example/example.proto", TplDir+"/api/proto/v1/example/example.proto", opts)
 	}
 
 	// config
