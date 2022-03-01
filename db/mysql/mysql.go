@@ -33,5 +33,4 @@ func (m *MysqlDB) Connect() (error, *gorm.DB) {
 	sqlDB.SetMaxOpenConns(100)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 	return nil, orm
-
 }

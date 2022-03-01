@@ -133,6 +133,13 @@ func CloneTpl() {
 }
 
 func CreateProject(opts *Opt, pwd string) {
+	apiDir := pwd + "/api"
+	TryErr(os.Mkdir(apiDir, os.ModePerm))
+	if opts.ServiceType == "rpc" {
+		TryErr(os.Mkdir(apiDir+"/v1/"+opts.ProjectName, os.ModePerm))
+		SimpleCreate(apiDir+"/v1/"+opts.ProjectName+"/example.proto", TplDir+"/api/v1/"+opts.ProjectName+"/example.proto", opts)
+	}
+
 	// config
 	configDir := pwd + "/configs"
 	TryErr(os.Mkdir(configDir, os.ModePerm))
