@@ -106,9 +106,11 @@ func (k *Kafka) Consumer(topic, queueBaseName string, job queue.JobBase, sleep, 
 	}
 	ctx := context.Background()
 	for { //防止rebalance后结束
+		fmt.Println("rebalance start")
 		topics := k.ConsumerTopics
 		handler := &consumerGroupHandler{k: k, Job: job, Retry: retry, Sleep: sleep, TimeOut: timeout, GroupID: groupID}
 		_ = group.Consume(ctx, topics, handler)
+		fmt.Println("rebalance end")
 	}
 }
 
@@ -121,21 +123,19 @@ func (k *Kafka) Close() {
 }
 
 func (c *consumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error {
+	fmt.Println("Setup")
 	tw, _ := timewheel.NewTimeWheel(1*time.Second, 360, timewheel.TickSafeMode())
 	c.TimeWheel = tw
 	c.TimeWheel.Start()
 	return nil
 }
 func (c *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error {
+	fmt.Println("Cleanup")
 	c.TimeWheel.Stop()
 	return nil
 }
 func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
-	fmt.Println("最外层")
-
 	for msg := range claim.Messages() {
-
-		fmt.Println("获取数据开始")
 		err := json.Unmarshal(msg.Value, c.Job)
 		if err != nil {
 			c.k.ExportErr(queue.Err(err), string(msg.Value), c.GroupID)
@@ -177,8 +177,6 @@ func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, cl
 		}
 
 		_, err = hunch.Retry(ctx, int(c.Retry)+1, func(ctx context.Context) (interface{}, error) {
-			fmt.Println("开始执行")
-
 			handlerErr := c.Job.Handler()
 			if handlerErr != nil {
 				c.k.ExportErr(queue.Err(handlerErr), string(msg.Value), c.GroupID)
@@ -187,7 +185,6 @@ func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, cl
 
 			return nil, handlerErr
 		})
-		fmt.Println("获取数据结束")
 
 		cancel()
 		sess.MarkMessage(msg, "")
