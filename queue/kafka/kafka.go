@@ -3,6 +3,7 @@ package kafka
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/Shopify/sarama"
 	"github.com/aaronjan/hunch"
 	"github.com/golang-module/carbon"
@@ -107,6 +108,7 @@ func (k *Kafka) Consumer(topic, queueBaseName string, job queue.JobBase, sleep, 
 		topics := k.ConsumerTopics
 		handler := &consumerGroupHandler{k: k, Job: job, Retry: retry, Sleep: sleep, TimeOut: timeout, GroupID: groupID}
 		_ = group.Consume(ctx, topics, handler)
+		fmt.Println("rebalance")
 	}
 }
 
@@ -130,6 +132,8 @@ func (c *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error {
 }
 func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
+
+		fmt.Println("获取数据开始")
 		err := json.Unmarshal(msg.Value, c.Job)
 		if err != nil {
 			c.k.ExportErr(queue.Err(err), string(msg.Value), c.GroupID)
@@ -171,6 +175,8 @@ func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, cl
 		}
 
 		_, err = hunch.Retry(ctx, int(c.Retry)+1, func(ctx context.Context) (interface{}, error) {
+			fmt.Println("开始执行")
+
 			handlerErr := c.Job.Handler()
 			if handlerErr != nil {
 				c.k.ExportErr(queue.Err(handlerErr), string(msg.Value), c.GroupID)
@@ -179,6 +185,7 @@ func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, cl
 
 			return nil, handlerErr
 		})
+		fmt.Println("获取数据结束")
 
 		cancel()
 		sess.MarkMessage(msg, "")
