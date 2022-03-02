@@ -12,6 +12,7 @@ import (
 	"github.com/rfyiamcool/go-timewheel"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -109,10 +110,10 @@ func (k *Kafka) Consumer(topic, queueBaseName string, job queue.JobBase, sleep, 
 	for { //防止rebalance后结束
 		topics := k.ConsumerTopics
 		handler := &consumerGroupHandler{
-			k: k,
-			Job: job,
-			Retry: retry,
-			Sleep: sleep,
+			k:       k,
+			Job:     job,
+			Retry:   retry,
+			Sleep:   sleep,
 			TimeOut: timeout,
 			GroupID: groupID,
 		}
@@ -139,11 +140,22 @@ func (c *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error {
 	return nil
 }
 
-
 //若Producer 设置key 则会将消息发送到一个partition上 不设置则会hash到每个partition
 //消费者从每一个partition取消息 有多少个partition则会创建多少个协程来调用 ConsumeClaim方法
-
-var cyclic = cyclicbarrier.New(1)
+var (
+	mu   sync.Mutex
+	pass bool
+)
+var cyclic = cyclicbarrier.NewWithAction(1, func() error {
+	for  {
+		if pass {
+			mu.Lock()
+			pass = false
+			mu.Unlock()
+			return nil
+		}
+	}
+})
 
 // ConsumeClaim 此方法调用次数 = patation数 此方法需要顺序执行
 func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
@@ -161,7 +173,6 @@ func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, cl
 
 		_ = cyclic.Await(ctx)
 		fmt.Println("开始执行")
-
 
 		headers := make(map[string]interface{}, 1)
 		for _, value := range msg.Headers {
@@ -201,6 +212,9 @@ func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, cl
 
 			return nil, handlerErr
 		})
+		mu.Lock()
+		pass = true
+		mu.Unlock()
 		fmt.Println("结束执行")
 		sess.MarkMessage(msg, "")
 		cancel()
