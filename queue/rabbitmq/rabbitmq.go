@@ -195,20 +195,20 @@ func (r *RabbitMQ) Consumer(topic, queueBaseName string, base queue.JobBase, sle
 	forever := make(chan bool)
 	go func() {
 		for d := range messages {
-			err := json.Unmarshal(d.Body, base)
-			if err != nil {
-				r.ExportErr(queue.Err(err), d)
+			jsonErr := json.Unmarshal(d.Body, base)
+			if jsonErr != nil {
+				r.ExportErr(queue.Err(jsonErr), d)
 			}
 
 			// producer delay
 			if pDelay, ok := d.Headers["delay"].(int32); ok && pDelay > 0 {
-				err := r.DLK(base, pDelay, nil)
-				if err != nil {
-					r.ExportErr(queue.Err(err), d)
+				DlkErr := r.DLK(base, pDelay, nil)
+				if DlkErr != nil {
+					r.ExportErr(queue.Err(DlkErr), d)
 				}
-				err = d.Ack(false)
-				if err != nil {
-					r.ExportErr(queue.Err(err), d)
+				ackErr := d.Ack(false)
+				if ackErr != nil {
+					r.ExportErr(queue.Err(ackErr), d)
 				}
 				continue
 			}
@@ -221,17 +221,17 @@ func (r *RabbitMQ) Consumer(topic, queueBaseName string, base queue.JobBase, sle
 
 			// retry and delay
 			_, _ = hunch.Retry(ctx, int(retry)+1, func(ctx context.Context) (interface{}, error) {
-				err := base.Handler()
-				if err != nil {
-					r.ExportErr(queue.Err(err), d)
+				handlerErr := base.Handler()
+				if handlerErr != nil {
+					r.ExportErr(queue.Err(handlerErr), d)
 					time.Sleep(time.Second * time.Duration(sleep))
 				}
-				return nil, err
+				return nil, handlerErr
 			})
 
-			err = d.Ack(false)
-			if err != nil {
-				r.ExportErr(queue.Err(err), d)
+			ackErr := d.Ack(false)
+			if ackErr != nil {
+				r.ExportErr(queue.Err(ackErr), d)
 			}
 			cancel()
 		}

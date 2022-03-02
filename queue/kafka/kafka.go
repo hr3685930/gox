@@ -132,7 +132,9 @@ func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, cl
 	for msg := range claim.Messages() {
 		err := json.Unmarshal(msg.Value, c.Job)
 		if err != nil {
+			c.k.ExportErr(queue.Err(err), string(msg.Value), c.GroupID)
 			sess.MarkMessage(msg, "")
+			continue
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.TimeOut)*time.Second)
 		if c.TimeOut == 0 {
@@ -150,16 +152,17 @@ func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, cl
 			msgHandler := reflect.New(reflect.ValueOf(c.Job).Elem().Type()).Interface().(queue.JobBase)
 			_ = c.TimeWheel.Add(time.Duration(delay)*time.Second, func() {
 				_, err = hunch.Retry(ctx, int(c.Retry)+1, func(ctx context.Context) (interface{}, error) {
-					err := json.Unmarshal(jsonRes, &msgHandler)
-					if err != nil {
-						sess.MarkMessage(msg, "")
+					jsonErr := json.Unmarshal(jsonRes, &msgHandler)
+					if jsonErr != nil {
+						c.k.ExportErr(queue.Err(jsonErr), string(jsonRes), c.GroupID)
+						return nil, nil
 					}
-					err = msgHandler.Handler()
-					if err != nil {
-						c.k.ExportErr(queue.Err(err), string(jsonRes), c.GroupID)
+					handlerErr := msgHandler.Handler()
+					if handlerErr != nil {
+						c.k.ExportErr(queue.Err(handlerErr), string(jsonRes), c.GroupID)
 						c.TimeWheel.Sleep(time.Duration(c.Sleep) * time.Second)
 					}
-					return nil, err
+					return nil, handlerErr
 				})
 				sess.MarkMessage(msg, "")
 			})
@@ -168,13 +171,13 @@ func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, cl
 		}
 
 		_, err = hunch.Retry(ctx, int(c.Retry)+1, func(ctx context.Context) (interface{}, error) {
-			err := c.Job.Handler()
-			if err != nil {
-				c.k.ExportErr(queue.Err(err), string(msg.Value), c.GroupID)
+			handlerErr := c.Job.Handler()
+			if handlerErr != nil {
+				c.k.ExportErr(queue.Err(handlerErr), string(msg.Value), c.GroupID)
 				c.TimeWheel.Sleep(time.Duration(c.Sleep) * time.Second)
 			}
 
-			return nil, err
+			return nil, handlerErr
 		})
 
 		cancel()
