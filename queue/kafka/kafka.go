@@ -108,7 +108,6 @@ func (k *Kafka) Consumer(topic, queueBaseName string, job queue.JobBase, sleep, 
 		topics := k.ConsumerTopics
 		handler := &consumerGroupHandler{k: k, Job: job, Retry: retry, Sleep: sleep, TimeOut: timeout, GroupID: groupID}
 		_ = group.Consume(ctx, topics, handler)
-		fmt.Println("rebalance")
 	}
 }
 
@@ -131,6 +130,8 @@ func (c *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error {
 	return nil
 }
 func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
+	fmt.Println("最外层")
+
 	for msg := range claim.Messages() {
 
 		fmt.Println("获取数据开始")
