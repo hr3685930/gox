@@ -41,6 +41,7 @@ func (k *Kafka) Connect() error {
 	config := sarama.NewConfig()
 	config.Version = sarama.V1_1_1_0
 	config.Consumer.Return.Errors = true
+	config.Consumer.Offsets.AutoCommit.Enable = false
 	config.Consumer.Offsets.Initial = sarama.OffsetOldest
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Partitioner = sarama.NewHashPartitioner
