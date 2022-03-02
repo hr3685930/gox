@@ -8,6 +8,7 @@ import (
 	"github.com/aaronjan/hunch"
 	"github.com/golang-module/carbon"
 	"github.com/hr3685930/pkg/queue"
+	"github.com/marusama/cyclicbarrier"
 	"github.com/rfyiamcool/go-timewheel"
 	"reflect"
 	"strings"
@@ -106,11 +107,16 @@ func (k *Kafka) Consumer(topic, queueBaseName string, job queue.JobBase, sleep, 
 	}
 	ctx := context.Background()
 	for { //防止rebalance后结束
-		fmt.Println("rebalance start")
 		topics := k.ConsumerTopics
-		handler := &consumerGroupHandler{k: k, Job: job, Retry: retry, Sleep: sleep, TimeOut: timeout, GroupID: groupID}
+		handler := &consumerGroupHandler{
+			k: k,
+			Job: job,
+			Retry: retry,
+			Sleep: sleep,
+			TimeOut: timeout,
+			GroupID: groupID,
+		}
 		_ = group.Consume(ctx, topics, handler)
-		fmt.Println("rebalance end")
 	}
 }
 
@@ -123,17 +129,23 @@ func (k *Kafka) Close() {
 }
 
 func (c *consumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error {
-	fmt.Println("Setup")
 	tw, _ := timewheel.NewTimeWheel(1*time.Second, 360, timewheel.TickSafeMode())
 	c.TimeWheel = tw
 	c.TimeWheel.Start()
 	return nil
 }
 func (c *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error {
-	fmt.Println("Cleanup")
 	c.TimeWheel.Stop()
 	return nil
 }
+
+
+//若Producer 设置key 则会将消息发送到一个partition上 不设置则会hash到每个partition
+//消费者从每一个partition取消息 有多少个partition则会创建多少个协程来调用 ConsumeClaim方法
+
+var cyclic = cyclicbarrier.New(1)
+
+// ConsumeClaim 此方法调用次数 = patation数 此方法需要顺序执行
 func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
 		err := json.Unmarshal(msg.Value, c.Job)
@@ -146,6 +158,10 @@ func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, cl
 		if c.TimeOut == 0 {
 			ctx = context.Background()
 		}
+
+		_ = cyclic.Await(ctx)
+		fmt.Println("开始执行")
+
 
 		headers := make(map[string]interface{}, 1)
 		for _, value := range msg.Headers {
@@ -185,9 +201,9 @@ func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, cl
 
 			return nil, handlerErr
 		})
-
-		cancel()
+		fmt.Println("结束执行")
 		sess.MarkMessage(msg, "")
+		cancel()
 	}
 	return nil
 }
