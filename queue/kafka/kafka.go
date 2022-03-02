@@ -155,9 +155,7 @@ func (c *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error {
 	return nil
 }
 
-//若Producer 设置key 则会将消息发送到一个partition上 不设置则会hash到每个partition
-//消费者从每一个partition取消息 有多少个partition则会创建多少个协程来调用 ConsumeClaim方法
-
+// 消费者会对应一个或者多个partition 有多少个partition则会创建多少个协程来调用 ConsumeClaim方法
 // ConsumeClaim 此方法调用次数 = patation数 此方法需要顺序执行
 func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
