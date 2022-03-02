@@ -3,18 +3,24 @@ package kafka
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"github.com/Shopify/sarama"
 	"github.com/aaronjan/hunch"
 	"github.com/golang-module/carbon"
 	"github.com/hr3685930/pkg/queue"
-	"github.com/marusama/cyclicbarrier"
 	"github.com/rfyiamcool/go-timewheel"
 	"reflect"
 	"strings"
-	"sync"
 	"time"
 )
+
+var message chan *msgFuncOpt
+
+type msgFuncOpt struct {
+	ConsumerGroupHandler *consumerGroupHandler
+	Sess                 sarama.ConsumerGroupSession
+	Claim                sarama.ConsumerGroupClaim
+	Msg                  *sarama.ConsumerMessage
+}
 
 type Kafka struct {
 	cli            sarama.Client
@@ -106,6 +112,15 @@ func (k *Kafka) Consumer(topic, queueBaseName string, job queue.JobBase, sleep, 
 	if err != nil {
 		return err
 	}
+	message = make(chan *msgFuncOpt, 1)
+	go func() {
+		for {
+			select {
+			case opt := <-message:
+				ConsumerHandler(opt.ConsumerGroupHandler, opt.Sess, opt.Claim, opt.Msg)
+			}
+		}
+	}()
 	ctx := context.Background()
 	for { //防止rebalance后结束
 		topics := k.ConsumerTopics
@@ -142,84 +157,66 @@ func (c *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error {
 
 //若Producer 设置key 则会将消息发送到一个partition上 不设置则会hash到每个partition
 //消费者从每一个partition取消息 有多少个partition则会创建多少个协程来调用 ConsumeClaim方法
-var (
-	mu   sync.Mutex
-	pass bool
-)
-var cyclic = cyclicbarrier.NewWithAction(1, func() error {
-	for  {
-		if pass {
-			mu.Lock()
-			pass = false
-			mu.Unlock()
-			return nil
-		}
-	}
-})
 
 // ConsumeClaim 此方法调用次数 = patation数 此方法需要顺序执行
 func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
-		err := json.Unmarshal(msg.Value, c.Job)
-		if err != nil {
-			c.k.ExportErr(queue.Err(err), string(msg.Value), c.GroupID)
-			sess.MarkMessage(msg, "")
-			continue
-		}
-		ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.TimeOut)*time.Second)
-		if c.TimeOut == 0 {
-			ctx = context.Background()
-		}
-
-		_ = cyclic.Await(ctx)
-		fmt.Println("开始执行")
-
-		headers := make(map[string]interface{}, 1)
-		for _, value := range msg.Headers {
-			headers[string(value.Key)] = queue.BytesToInt32(value.Value)
-		}
-
-		if delay, ok := headers["delay"].(int32); ok && delay > 0 {
-			jsonRes := msg.Value
-			// interface copy
-			msgHandler := reflect.New(reflect.ValueOf(c.Job).Elem().Type()).Interface().(queue.JobBase)
-			_ = c.TimeWheel.Add(time.Duration(delay)*time.Second, func() {
-				_, err = hunch.Retry(ctx, int(c.Retry)+1, func(ctx context.Context) (interface{}, error) {
-					jsonErr := json.Unmarshal(jsonRes, &msgHandler)
-					if jsonErr != nil {
-						c.k.ExportErr(queue.Err(jsonErr), string(jsonRes), c.GroupID)
-						return nil, nil
-					}
-					handlerErr := msgHandler.Handler()
-					if handlerErr != nil {
-						c.k.ExportErr(queue.Err(handlerErr), string(jsonRes), c.GroupID)
-						c.TimeWheel.Sleep(time.Duration(c.Sleep) * time.Second)
-					}
-					return nil, handlerErr
-				})
-				sess.MarkMessage(msg, "")
-			})
-			cancel()
-			continue
-		}
-
-		_, err = hunch.Retry(ctx, int(c.Retry)+1, func(ctx context.Context) (interface{}, error) {
-			handlerErr := c.Job.Handler()
-			if handlerErr != nil {
-				c.k.ExportErr(queue.Err(handlerErr), string(msg.Value), c.GroupID)
-				c.TimeWheel.Sleep(time.Duration(c.Sleep) * time.Second)
-			}
-
-			return nil, handlerErr
-		})
-		mu.Lock()
-		pass = true
-		mu.Unlock()
-		fmt.Println("结束执行")
-		sess.MarkMessage(msg, "")
-		cancel()
+		message <- &msgFuncOpt{c, sess, claim, msg}
 	}
 	return nil
+}
+
+func ConsumerHandler(c *consumerGroupHandler, sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim, msg *sarama.ConsumerMessage) {
+	err := json.Unmarshal(msg.Value, c.Job)
+	if err != nil {
+		c.k.ExportErr(queue.Err(err), string(msg.Value), c.GroupID)
+		sess.MarkMessage(msg, "")
+		return
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.TimeOut)*time.Second)
+	if c.TimeOut == 0 {
+		ctx = context.Background()
+	}
+
+	headers := make(map[string]interface{}, 1)
+	for _, value := range msg.Headers {
+		headers[string(value.Key)] = queue.BytesToInt32(value.Value)
+	}
+
+	if delay, ok := headers["delay"].(int32); ok && delay > 0 {
+		jsonRes := msg.Value
+		// interface copy
+		msgHandler := reflect.New(reflect.ValueOf(c.Job).Elem().Type()).Interface().(queue.JobBase)
+		_ = c.TimeWheel.Add(time.Duration(delay)*time.Second, func() {
+			_, err = hunch.Retry(ctx, int(c.Retry)+1, func(ctx context.Context) (interface{}, error) {
+				jsonErr := json.Unmarshal(jsonRes, &msgHandler)
+				if jsonErr != nil {
+					c.k.ExportErr(queue.Err(jsonErr), string(jsonRes), c.GroupID)
+					return nil, nil
+				}
+				handlerErr := msgHandler.Handler()
+				if handlerErr != nil {
+					c.k.ExportErr(queue.Err(handlerErr), string(jsonRes), c.GroupID)
+					c.TimeWheel.Sleep(time.Duration(c.Sleep) * time.Second)
+				}
+				return nil, handlerErr
+			})
+			sess.MarkMessage(msg, "")
+		})
+		cancel()
+		return
+	}
+
+	_, err = hunch.Retry(ctx, int(c.Retry)+1, func(ctx context.Context) (interface{}, error) {
+		handlerErr := c.Job.Handler()
+		if handlerErr != nil {
+			c.k.ExportErr(queue.Err(handlerErr), string(msg.Value), c.GroupID)
+			c.TimeWheel.Sleep(time.Duration(c.Sleep) * time.Second)
+		}
+		return nil, handlerErr
+	})
+	sess.MarkMessage(msg, "")
+	cancel()
 }
 
 func (k *Kafka) ExportErr(err error, msg, groupID string) {
