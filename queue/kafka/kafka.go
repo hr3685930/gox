@@ -155,7 +155,7 @@ func (c *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error {
 	return nil
 }
 
-// 消费者会对应一个或者多个partition 有多少个partition则会创建多少个协程来调用 ConsumeClaim方法
+// 消费者会对应一个或者多个partition
 // ConsumeClaim 此方法调用次数 = patation数 此方法需要顺序执行
 func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
