@@ -48,9 +48,8 @@ type consumerGroupHandler struct {
 func (k *Kafka) Connect() error {
 	config := sarama.NewConfig()
 	config.Version = sarama.V1_1_1_0
-	config.Consumer.Return.Errors = true
-	config.Consumer.Offsets.AutoCommit.Enable = false
-	config.Consumer.Offsets.Initial = sarama.OffsetOldest
+	//这里的自动提交，是基于被标记过的消息（sess.MarkMessage(msg, “")）
+	config.Consumer.Offsets.AutoCommit.Enable = true
 	config.Producer.RequiredAcks = sarama.WaitForAll
 	config.Producer.Partitioner = sarama.NewHashPartitioner
 	config.Producer.Return.Successes = true
