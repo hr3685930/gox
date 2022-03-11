@@ -14,7 +14,6 @@ require (
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/golang-module/carbon v1.5.5
-	github.com/golang/protobuf v1.5.2
 	github.com/jeremywohl/flatten v1.0.1
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/mitchellh/mapstructure v1.4.3
@@ -54,6 +53,7 @@ require (
 	github.com/gobuffalo/envy v1.7.0 // indirect
 	github.com/gobuffalo/packd v0.3.0 // indirect
 	github.com/gobuffalo/packr v1.30.1 // indirect
+	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/hashicorp/go-uuid v1.0.2 // indirect
 	github.com/hashicorp/go-version v1.4.0 // indirect

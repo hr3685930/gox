@@ -3,13 +3,13 @@ package rpc
 import (
 	"context"
 	"fmt"
-	"github.com/golang/protobuf/ptypes/any"
 	"github.com/pkg/errors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 	"net"
+	"runtime/debug"
 )
 
 type Grpc struct {
@@ -37,6 +37,20 @@ func (g *Grpc) Run(addr string) error {
 	return g.G.Serve(lis)
 }
 
+type GrpcError struct {
+	Err   error
+	Stack []byte `json:"-"`
+}
+
+func (h *GrpcError) Error() string {
+	return h.Err.Error()
+}
+
+func (h *GrpcError) GetStack() string {
+	return string(h.Stack)
+}
+
+
 type ErrorReport func(md metadata.MD, req interface{}, stack string, resp *status.Status)
 
 func CustomErrInterceptor(errReport ErrorReport) grpc.UnaryServerInterceptor {
@@ -51,29 +65,22 @@ func CustomErrInterceptor(errReport ErrorReport) grpc.UnaryServerInterceptor {
 }
 
 func ErrorHandler(md metadata.MD, req interface{}, err error, errReport ErrorReport) error {
-	s := status.Convert(err)
 	var stack string
-	for _, detail := range s.Details() {
-		switch t := detail.(type) {
-		case *any.Any:
-			stack = string(t.Value)
-		}
+	if e, ok := err.(*GrpcError); ok {
+		stack = string(e.Stack)
+		err = e.Err
+	} else {
+		stack = string(debug.Stack())
 	}
 
+	s := status.Convert(err)
 	errReport(md, req, stack, s)
 	return status.Error(s.Code(), s.Message())
 }
 
-func Err(code codes.Code, msg string) error {
-	s := status.New(code, msg)
-	st, _ := s.WithDetails(&any.Any{
-		Value: stack(msg),
-	})
-	return st.Err()
-}
-
-func stack(msg string) []byte {
-	stack := fmt.Sprintf("%+v\n", errors.New(msg))
-	fmt.Println(stack)
-	return []byte(stack)
+func Err(code codes.Code, msg string) *GrpcError {
+	return &GrpcError{
+		Err:   status.New(code, msg).Err(),
+		Stack: []byte(fmt.Sprintf("%+v\n", errors.New(msg))),
+	}
 }

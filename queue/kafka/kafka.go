@@ -224,7 +224,7 @@ func (k *Kafka) ExportErr(err error, msg, groupID string) {
 		Queue:      groupID,
 		Message:    msg,
 		Exception:  err.Error(),
-		Stack:      e.Stack(),
+		Stack:      e.GetStack(),
 		FiledAt:    carbon.Now(),
 	})
 }

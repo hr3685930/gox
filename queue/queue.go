@@ -2,6 +2,7 @@ package queue
 
 import (
 	"fmt"
+	"github.com/hr3685930/pkg/goo"
 	"github.com/pkg/errors"
 )
 
@@ -36,16 +37,19 @@ func (qe *Error) Error() string {
 }
 
 func Err(err error) *Error {
-	e, ok := err.(*Error)
+	e, ok := err.(interface{ goo.Error })
+	var stack string
 	if ok {
-		return e
+		stack = e.GetStack()
+	}else{
+		stack = fmt.Sprintf("%+v\n", errors.New(err.Error()))
 	}
 	return &Error{
 		s:     err.Error(),
-		stack: fmt.Sprintf("%+v\n", errors.New(err.Error())),
+		stack: stack,
 	}
 }
 
-func (qe *Error) Stack() string {
+func (qe *Error) GetStack() string {
 	return qe.stack
 }

@@ -25,6 +25,10 @@ func (h *HttpError) Error() string {
 	return h.Msg
 }
 
+func (h *HttpError) GetStack() string {
+	return string(h.Stack)
+}
+
 func NewError(statusCode, code int, msg string) *HttpError {
 	return &HttpError{
 		HttpCode: statusCode,

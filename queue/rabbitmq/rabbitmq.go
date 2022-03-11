@@ -285,7 +285,7 @@ func (r *RabbitMQ) ExportErr(err error, d amqp.Delivery) {
 		Queue:      r.QueueName,
 		Message:    string(d.Body),
 		Exception:  err.Error(),
-		Stack:      e.Stack(),
+		Stack:      e.GetStack(),
 		FiledAt:    carbon.Now(),
 	})
 }
