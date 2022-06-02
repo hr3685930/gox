@@ -12,6 +12,7 @@ type Group struct {
 	Error  chan error
 }
 
+// NewGroup num控制协程处理数
 func NewGroup(num int) *Group {
 	rs := make(chan interface{}, num)
 	err := make(chan error, num)
@@ -35,6 +36,7 @@ func (g *Group) One(ctx context.Context, fn SyncFunc) {
 	}(fn)
 }
 
+// Wait 返回结果为无序
 func (g *Group) Wait() ([]interface{}, []error) {
 	g.wg.Wait()
 	rs := make([]interface{}, 0)
@@ -63,6 +65,7 @@ func (g *Group) Wait() ([]interface{}, []error) {
 
 type SyncFunc func(ctx context.Context) (interface{}, error)
 
+// All 有序返回结果 func协程一次处理  error nil也返回
 func All(ctx context.Context, fns ...SyncFunc) ([]interface{}, []error) {
 	rs := make([]interface{}, len(fns))
 	errs := make([]error, len(fns))

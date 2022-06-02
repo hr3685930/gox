@@ -6,7 +6,7 @@ import (
 )
 
 var AsyncErr chan error
-var AsyncErrFunc func(err error)
+var AsyncErrFunc func(stack string)
 type AsyncFunc func() error
 
 func New() {
@@ -16,12 +16,20 @@ func New() {
 		for {
 			select {
 			case err := <-AsyncErr:
-				AsyncErrFunc(err)
+				e, ok := err.(interface{ Error })
+				var stack string
+				if ok {
+					stack = e.GetStack()
+				}else{
+					stack = fmt.Sprintf("%+v\n", errors.New(err.Error()))
+				}
+				AsyncErrFunc(stack)
 			}
 		}
 	}()
 }
 
+// GO 无需等待处理完成
 func GO(fns AsyncFunc) {
 	go func(f AsyncFunc) {
 		defer func() {
@@ -30,10 +38,12 @@ func GO(fns AsyncFunc) {
 			}
 		}()
 		err := f()
-		AsyncErr <- err
+		if err != nil {
+			AsyncErr <- err
+		}
 	}(fns)
 }
 
-func errHandler(err error)  {
-	fmt.Printf("%+v\n", err)
+func errHandler(stack string)  {
+	fmt.Printf(stack)
 }
