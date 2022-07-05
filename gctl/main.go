@@ -40,7 +40,11 @@ func main() {
 	repoFlags := []cli.Flag{
 		cli.StringFlag{
 			Name:  "type",
-			Usage: "repo类型, 支持simple,db",
+			Usage: "repo类型 db,api,es",
+		},
+		cli.StringFlag{
+			Name:  "cache",
+			Usage: "repo 增加cache层",
 		},
 		cli.StringFlag{
 			Name:  "dir",

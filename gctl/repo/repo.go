@@ -26,7 +26,7 @@ func Create(c *cli.Context) {
 		TryErr(errors.New("dir 参数不存在"))
 	}
 	types := c.String("type")
-	if types != "simple" && types != "db" {
+	if types != "api" && types != "es" && types != "db" {
 		TryErr(errors.New("type 参数不存在"))
 	}
 	model := c.String("model")
@@ -49,7 +49,13 @@ func Create(c *cli.Context) {
 	opts.FileName = fileName
 	TryErr(os.Mkdir(dir, os.ModePerm))
 	SimpleCreate(dir+"/"+fileName+".go", TplDir+"/internal/repo/impl.tpl", opts)
-	SimpleCreate(dir+"/"+fileName+"_db.go", TplDir+"/internal/repo/impl_db.tpl", opts)
+	if types == "db" {
+		SimpleCreate(dir+"/"+fileName+"_db.go", TplDir+"/internal/repo/impl_db.tpl", opts)
+	} else if types == "api" {
+		SimpleCreate(dir+"/"+fileName+"_api.go", TplDir+"/internal/repo/impl_api.tpl", opts)
+	} else if types == "es" {
+		SimpleCreate(dir+"/"+fileName+"_es.go", TplDir+"/internal/repo/impl_es.tpl", opts)
+	}
 	TryErr(os.RemoveAll(".goo"))
 }
 
