@@ -5,6 +5,8 @@ go 1.17
 require (
 	github.com/Shopify/sarama v1.30.1
 	github.com/aaronjan/hunch v1.1.2
+	github.com/cloudevents/sdk-go/protocol/kafka_sarama/v2 v2.10.1
+	github.com/cloudevents/sdk-go/v2 v2.10.1
 	github.com/creasty/defaults v1.5.2
 	github.com/ddliu/go-httpclient v0.6.9
 	github.com/fatih/structs v1.1.0
@@ -14,6 +16,7 @@ require (
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/go-redis/redis/v8 v8.11.4
 	github.com/golang-module/carbon v1.5.5
+	github.com/hashicorp/go-uuid v1.0.2
 	github.com/jeremywohl/flatten v1.0.1
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/mitchellh/mapstructure v1.4.3
@@ -55,7 +58,7 @@ require (
 	github.com/gobuffalo/packr v1.30.1 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
-	github.com/hashicorp/go-uuid v1.0.2 // indirect
+	github.com/google/uuid v1.1.2 // indirect
 	github.com/hashicorp/go-version v1.4.0 // indirect
 	github.com/hashicorp/hcl v1.0.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect

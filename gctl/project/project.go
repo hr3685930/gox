@@ -170,7 +170,7 @@ func CreateProject(opts *Opt, pwd string) {
 		SimpleCreate(initBootDir+"/sentry.go", TplDir+"/init/boot/sentry.tpl", opts)
 	}
 	if opts.ServiceType == "api" {
-		SimpleCreate(initBootDir+"/http.go", TplDir+"/init/boot/http.tpl", opts)
+		SimpleCreate(initBootDir+"/sender.go", TplDir+"/init/boot/http.tpl", opts)
 	} else {
 		SimpleCreate(initBootDir+"/grpc.go", TplDir+"/init/boot/grpc.tpl", opts)
 	}
@@ -189,7 +189,7 @@ func CreateProject(opts *Opt, pwd string) {
 	SimpleCreate(errsExportDir+"/queue.go", TplDir+"/internal/errs/export/queue.tpl", opts)
 	SimpleCreate(errsExportDir+"/report.go", TplDir+"/internal/errs/export/report.tpl", opts)
 	if opts.ServiceType == "api" {
-		SimpleCreate(errsExportDir+"/http.go", TplDir+"/internal/errs/export/http.tpl", opts)
+		SimpleCreate(errsExportDir+"/sender.go", TplDir+"/internal/errs/export/http.tpl", opts)
 	} else {
 		SimpleCreate(errsExportDir+"/grpc.go", TplDir+"/internal/errs/export/grpc.tpl", opts)
 	}
@@ -198,7 +198,7 @@ func CreateProject(opts *Opt, pwd string) {
 	errsDir := pwd + "/internal/errs"
 	TryErr(os.MkdirAll(errsDir, os.ModePerm))
 	if opts.ServiceType == "api" {
-		SimpleCreate(errsDir+"/http.go", TplDir+"/internal/errs/http.tpl", opts)
+		SimpleCreate(errsDir+"/sender.go", TplDir+"/internal/errs/http.tpl", opts)
 	} else {
 		SimpleCreate(errsDir+"/grpc.go", TplDir+"/internal/errs/grpc.tpl", opts)
 	}
