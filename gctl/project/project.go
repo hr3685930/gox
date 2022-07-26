@@ -135,6 +135,8 @@ func CloneTpl() {
 func CreateProject(opts *Opt, pwd string) {
 	apiDir := pwd + "/api"
 	TryErr(os.Mkdir(apiDir, os.ModePerm))
+	TryErr(os.MkdirAll(apiDir+"/proto/v1/cloudevent", os.ModePerm))
+	SimpleCreate(apiDir+"/proto/v1/cloudevent/cloudevent.proto", TplDir+"/api/proto/v1/cloudevent/cloudevent.proto", opts)
 	if opts.ServiceType == "rpc" {
 		TryErr(os.MkdirAll(apiDir+"/proto/v1/example", os.ModePerm))
 		SimpleCreate(apiDir+"/proto/v1/example/example.proto", TplDir+"/api/proto/v1/example/example.proto", opts)
@@ -163,6 +165,7 @@ func CreateProject(opts *Opt, pwd string) {
 	SimpleCreate(initBootDir+"/log.go", TplDir+"/init/boot/log.tpl", opts)
 	SimpleCreate(initBootDir+"/queue.go", TplDir+"/init/boot/queue.tpl", opts)
 	SimpleCreate(initBootDir+"/signal.go", TplDir+"/init/boot/signal.tpl", opts)
+	SimpleCreate(initBootDir+"/event.go", TplDir+"/init/boot/event.tpl", opts)
 	if opts.IsTrace {
 		SimpleCreate(initBootDir+"/trace.go", TplDir+"/init/boot/trace.tpl", opts)
 	}
@@ -170,7 +173,7 @@ func CreateProject(opts *Opt, pwd string) {
 		SimpleCreate(initBootDir+"/sentry.go", TplDir+"/init/boot/sentry.tpl", opts)
 	}
 	if opts.ServiceType == "api" {
-		SimpleCreate(initBootDir+"/sender.go", TplDir+"/init/boot/http.tpl", opts)
+		SimpleCreate(initBootDir+"/http.go", TplDir+"/init/boot/http.tpl", opts)
 	} else {
 		SimpleCreate(initBootDir+"/grpc.go", TplDir+"/init/boot/grpc.tpl", opts)
 	}
@@ -181,6 +184,7 @@ func CreateProject(opts *Opt, pwd string) {
 	SimpleCreate(commandsDir+"/command.go", TplDir+"/internal/commands/command.tpl", opts)
 	SimpleCreate(commandsDir+"/consumer.go", TplDir+"/internal/commands/consumer.tpl", opts)
 	SimpleCreate(commandsDir+"/migrate.go", TplDir+"/internal/commands/migrate.tpl", opts)
+	SimpleCreate(commandsDir+"/event.go", TplDir+"/internal/commands/event.tpl", opts)
 
 	//errsExportDir
 	errsExportDir := pwd + "/internal/errs/export"
@@ -188,8 +192,9 @@ func CreateProject(opts *Opt, pwd string) {
 	SimpleCreate(errsExportDir+"/goroutine.go", TplDir+"/internal/errs/export/goroutine.tpl", opts)
 	SimpleCreate(errsExportDir+"/queue.go", TplDir+"/internal/errs/export/queue.tpl", opts)
 	SimpleCreate(errsExportDir+"/report.go", TplDir+"/internal/errs/export/report.tpl", opts)
+	SimpleCreate(errsExportDir+"/event.go", TplDir+"/internal/errs/export/event.tpl", opts)
 	if opts.ServiceType == "api" {
-		SimpleCreate(errsExportDir+"/sender.go", TplDir+"/internal/errs/export/http.tpl", opts)
+		SimpleCreate(errsExportDir+"/http.go", TplDir+"/internal/errs/export/http.tpl", opts)
 	} else {
 		SimpleCreate(errsExportDir+"/grpc.go", TplDir+"/internal/errs/export/grpc.tpl", opts)
 	}
@@ -198,20 +203,32 @@ func CreateProject(opts *Opt, pwd string) {
 	errsDir := pwd + "/internal/errs"
 	TryErr(os.MkdirAll(errsDir, os.ModePerm))
 	if opts.ServiceType == "api" {
-		SimpleCreate(errsDir+"/sender.go", TplDir+"/internal/errs/http.tpl", opts)
+		SimpleCreate(errsDir+"/http.go", TplDir+"/internal/errs/http.tpl", opts)
 	} else {
 		SimpleCreate(errsDir+"/grpc.go", TplDir+"/internal/errs/grpc.tpl", opts)
 	}
+
+	//eventDir
+	eventDir := pwd + "/internal/events"
+	TryErr(os.MkdirAll(eventDir, os.ModePerm))
+	SimpleCreate(eventDir+"/event.go", TplDir+"/internal/events/event.tpl", opts)
+
+	//eventListenDir
+	eventListenDir := pwd + "/internal/events/listener"
+	TryErr(os.MkdirAll(eventListenDir, os.ModePerm))
+	SimpleCreate(eventListenDir+"/example.go", TplDir+"/internal/events/listener/example.tpl", opts)
 
 	if opts.ServiceType == "api" {
 		//handlerDir
 		handlerDir := pwd + "/internal/http/handler"
 		TryErr(os.MkdirAll(handlerDir, os.ModePerm))
 		SimpleCreate(handlerDir+"/router.go", TplDir+"/internal/http/handler/router.tpl", opts)
+		SimpleCreate(handlerDir+"/event.go", TplDir+"/internal/http/handler/event.tpl", opts)
 	} else {
 		// rpcDir
 		rpcDir := pwd + "/internal/rpc"
 		TryErr(os.MkdirAll(rpcDir, os.ModePerm))
+		SimpleCreate(rpcDir+"/event.go", TplDir+"/internal/rpc/event.tpl", opts)
 	}
 
 	// job
@@ -231,6 +248,16 @@ func CreateProject(opts *Opt, pwd string) {
 	// types
 	typesDir := pwd + "/internal/types"
 	TryErr(os.MkdirAll(typesDir, os.ModePerm))
+
+	// utils
+	utilsDir := pwd + "/internal/utils"
+	TryErr(os.MkdirAll(utilsDir, os.ModePerm))
+	SimpleCreate(utilsDir+"/kafka.go", TplDir+"/internal/utils/kafka.tpl", opts)
+	// utils format
+	utilsFormatDir := pwd + "/internal/utils/format"
+	TryErr(os.MkdirAll(utilsFormatDir, os.ModePerm))
+	SimpleCreate(utilsFormatDir+"/datacodec.go", TplDir+"/internal/utils/format/datacodec.tpl", opts)
+	SimpleCreate(utilsFormatDir+"/protobuf.go", TplDir+"/internal/utils/format/protobuf.tpl", opts)
 
 	// log
 	storageDir := pwd + "/storage/log"
@@ -265,6 +292,7 @@ func CreateProject(opts *Opt, pwd string) {
 		TryErr(ExecShell("go mod init " + opts.ProjectName))
 	}
 
+	TryErr(ExecShell("protoc --go_out=plugins=grpc:. api/proto/v1/cloudevent/*.proto"))
 	TryErr(ExecShell("go mod tidy -compat=1.17"))
 }
 
