@@ -7,6 +7,10 @@ import (
 	"github.com/hr3685930/pkg/event"
 )
 
+var SendFn = func(ctx context.Context, msg interface{}, endpoint string, event ce.Event) error {
+	return nil
+}
+
 type rpcEvent struct {
 	ce.Event
 	endpoint string
@@ -32,5 +36,5 @@ func (he *rpcEvent) SetCloudEventSource(source string) {
 }
 
 func (he *rpcEvent) Send(ctx context.Context, obj interface{}) error {
-	return event.RpcSendFn(ctx, obj, he.endpoint, he.Event)
+	return SendFn(ctx, obj, he.endpoint, he.Event)
 }
