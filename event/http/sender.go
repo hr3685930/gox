@@ -51,6 +51,9 @@ func (he *httpEvent) Send(ctx context.Context, obj interface{}) error {
 	} else {
 		var httpResult *cehttp.Result
 		cloudevents.ResultAs(res, &httpResult)
-		return httpResult
+		if httpResult.StatusCode != 200 {
+			return errors.Errorf("状态码错误: %+v\n", res)
+		}
+		return nil
 	}
 }
