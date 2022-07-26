@@ -23,7 +23,7 @@ type msgFuncOpt struct {
 }
 
 type Kafka struct {
-	cli            sarama.Client
+	Cli            sarama.Client
 	Brokers        []string
 	ConsumerTopics []string
 	ProducerTopic  string
@@ -58,16 +58,16 @@ func (k *Kafka) Connect() error {
 	if err != nil {
 		return err
 	}
-	k.cli = client
+	k.Cli = client
 	return nil
 }
 
 func (k *Kafka) ProducerConnect() queue.Queue {
-	return &Kafka{cli: k.cli, Prefix: k.Prefix, ProducerTopic: k.ProducerTopic, ConsumerTopics: k.ConsumerTopics, Brokers: k.Brokers}
+	return &Kafka{Cli: k.Cli, Prefix: k.Prefix, ProducerTopic: k.ProducerTopic, ConsumerTopics: k.ConsumerTopics, Brokers: k.Brokers}
 }
 
 func (k *Kafka) ConsumerConnect() queue.Queue {
-	return &Kafka{cli: k.cli, Prefix: k.Prefix, ProducerTopic: k.ProducerTopic, ConsumerTopics: k.ConsumerTopics, Brokers: k.Brokers}
+	return &Kafka{Cli: k.Cli, Prefix: k.Prefix, ProducerTopic: k.ProducerTopic, ConsumerTopics: k.ConsumerTopics, Brokers: k.Brokers}
 }
 
 func (k *Kafka) Topic(topic string) {
@@ -76,7 +76,7 @@ func (k *Kafka) Topic(topic string) {
 }
 
 func (k *Kafka) Producer(topic, queueBaseName string, message []byte, delay int32) error {
-	p, err := sarama.NewSyncProducerFromClient(k.cli)
+	p, err := sarama.NewSyncProducerFromClient(k.Cli)
 	if err != nil {
 		return err
 	}
@@ -106,7 +106,7 @@ func (k *Kafka) Producer(topic, queueBaseName string, message []byte, delay int3
 
 func (k *Kafka) Consumer(topic, queueBaseName string, job queue.JobBase, sleep, retry, timeout int32) error {
 	groupID := topic + "_" + queueBaseName + "_" + k.Prefix
-	group, err := sarama.NewConsumerGroupFromClient(groupID, k.cli)
+	group, err := sarama.NewConsumerGroupFromClient(groupID, k.Cli)
 	k.ConsumerTopics = []string{topic}
 	if err != nil {
 		return err
@@ -140,7 +140,7 @@ func (k *Kafka) Err(failed queue.FailedJobs) {
 }
 
 func (k *Kafka) Close() {
-	_ = k.cli.Close()
+	_ = k.Cli.Close()
 }
 
 func (c *consumerGroupHandler) Setup(_ sarama.ConsumerGroupSession) error {
