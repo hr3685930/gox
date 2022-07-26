@@ -11,6 +11,7 @@ import (
 	"github.com/hr3685930/pkg/event/gochan"
 	"github.com/hr3685930/pkg/event/http"
 	"github.com/hr3685930/pkg/event/kafka"
+	event "github.com/hr3685930/pkg/event/rpc"
 	"github.com/pkg/errors"
 	"log"
 )
@@ -18,6 +19,11 @@ import (
 const DefaultSource = "https://github.com/hr3685930/pkg/event/sender"
 
 var EventErr = make(chan error, 1)
+
+var RpcSendFn = func(ctx context.Context, msg interface{}) error {
+	return nil
+}
+
 type CEfn func(ctx context.Context, event cloudevents.Event) protocol.Result
 
 type Event struct {
@@ -121,4 +127,9 @@ func NewChanReceive(fn CEfn) error {
 	}()
 
 	return nil
+}
+
+func NewRpcEvent(endpoint, eventName string) *Event {
+	r := event.NewRpcEvent(endpoint, eventName)
+	return &Event{CloudEvent: r}
 }
