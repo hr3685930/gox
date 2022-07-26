@@ -75,20 +75,21 @@ func NewKafkaEvent(client sarama.Client, topic string, eventName string) *Event 
 	return &Event{CloudEvent: kafkaEvent}
 }
 
-func NewKafkaReceiver(ctx context.Context, client sarama.Client, topic, group string, fn CEfn) {
+func NewKafkaReceiver(ctx context.Context, client sarama.Client, topic, group string, fn CEfn) error {
 	consumer := kafka_sarama.NewConsumerFromClient(client, group, topic)
 	c, err := cloudevents.NewClient(consumer)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	log.Println("will listen consuming topic :", topic)
 	err = c.StartReceiver(ctx, fn)
 	if err != nil {
-		panic(err)
+		return err
 	} else {
 		log.Printf("receiver stopped\n")
 	}
+	return nil
 }
 
 func NewChannelEvent(eventName string) *Event {
@@ -106,10 +107,10 @@ func NewChannelEvent(eventName string) *Event {
 	return &Event{CloudEvent: ch}
 }
 
-func NewChanReceive(fn CEfn) {
+func NewChanReceive(fn CEfn) error {
 	ch, err := gochan.NewChannelEvent()
 	if err != nil {
-		panic(err)
+		return err
 	}
 	// Start the receiver
 	go func() {
@@ -118,4 +119,6 @@ func NewChanReceive(fn CEfn) {
 		}
 		log.Println("channel event listen stop")
 	}()
+
+	return nil
 }
