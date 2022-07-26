@@ -127,5 +127,12 @@ func NewChanReceive(fn CEfn) error {
 
 func NewRpcEvent(endpoint, eventName string) *Event {
 	r := event.NewRpcEvent(endpoint, eventName)
+	UUID, err := uuid.GenerateUUID()
+	if err != nil {
+		EventErr <- errors.Errorf("%+v\n", err)
+	}
+	r.SetCloudEventID(UUID)
+	r.SetCloudEventType(eventName)
+	r.SetCloudEventSource(DefaultSource)
 	return &Event{CloudEvent: r}
 }

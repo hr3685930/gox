@@ -4,7 +4,6 @@ import (
 	"context"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	ce "github.com/cloudevents/sdk-go/v2/event"
-	"github.com/hr3685930/pkg/event"
 )
 
 var SendFn = func(ctx context.Context, msg interface{}, endpoint string, event ce.Event) error {
@@ -18,8 +17,6 @@ type rpcEvent struct {
 
 func NewRpcEvent(endpoint, eventName string) *rpcEvent {
 	e := cloudevents.NewEvent()
-	e.SetType(eventName)
-	e.SetSource(event.DefaultSource)
 	return &rpcEvent{Event: e, endpoint: endpoint}
 }
 
