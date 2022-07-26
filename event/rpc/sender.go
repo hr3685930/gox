@@ -32,5 +32,5 @@ func (he *rpcEvent) SetCloudEventSource(source string) {
 }
 
 func (he *rpcEvent) Send(ctx context.Context, obj interface{}) error {
-	return event.RpcSendFn(ctx, obj)
+	return event.RpcSendFn(ctx, obj, he.endpoint, he.Event)
 }

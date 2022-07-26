@@ -6,6 +6,7 @@ import (
 	"github.com/cloudevents/sdk-go/protocol/kafka_sarama/v2"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/client"
+	ce "github.com/cloudevents/sdk-go/v2/event"
 	"github.com/cloudevents/sdk-go/v2/protocol"
 	"github.com/hashicorp/go-uuid"
 	"github.com/hr3685930/pkg/event/gochan"
@@ -20,7 +21,7 @@ const DefaultSource = "https://github.com/hr3685930/pkg/event/sender"
 
 var EventErr = make(chan error, 1)
 
-var RpcSendFn = func(ctx context.Context, msg interface{}) error {
+var RpcSendFn = func(ctx context.Context, msg interface{}, endpoint string, event ce.Event) error {
 	return nil
 }
 
