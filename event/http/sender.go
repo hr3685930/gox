@@ -51,6 +51,6 @@ func (he *httpEvent) Send(ctx context.Context, obj interface{}) error {
 	} else {
 		var httpResult *cehttp.Result
 		cloudevents.ResultAs(res, &httpResult)
-		return res
+		return httpResult
 	}
 }
