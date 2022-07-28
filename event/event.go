@@ -62,8 +62,8 @@ func NewHTTPReceive(ctx context.Context, fn CEfn) (*client.EventReceiver, error)
 	return h, nil
 }
 
-func NewKafkaEvent(client sarama.Client, topic string, eventName string) *Event {
-	kafkaEvent, err := kafka.NewKafkaEvent(client, topic)
+func NewKafkaEvent(topic string, eventName string) *Event {
+	kafkaEvent, err := kafka.NewKafkaEvent(topic)
 	if err != nil {
 		EventErr <- errors.Errorf("%+v\n", err)
 	}

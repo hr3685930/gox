@@ -17,8 +17,13 @@ type kafkaEvent struct {
 	kafka_sarama.Sender
 }
 
-func NewKafkaEvent(client sarama.Client, topic string) (*kafkaEvent, error) {
-	sender, err := kafka_sarama.NewSenderFromClient(client, topic)
+var EventClient sarama.Client
+
+func NewKafkaEvent(topic string) (*kafkaEvent, error) {
+	if EventClient == nil {
+		return nil, errors.New("kafka client is nil")
+	}
+	sender, err := kafka_sarama.NewSenderFromClient(EventClient, topic)
 	if err != nil {
 		return nil, err
 	}
