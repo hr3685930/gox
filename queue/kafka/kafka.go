@@ -8,6 +8,7 @@ import (
 	"github.com/golang-module/carbon"
 	"github.com/hr3685930/pkg/queue"
 	"github.com/rfyiamcool/go-timewheel"
+	"net"
 	"reflect"
 	"strings"
 	"time"
@@ -227,4 +228,15 @@ func (k *Kafka) ExportErr(err error, msg, groupID string) {
 		Stack:      e.GetStack(),
 		FiledAt:    carbon.Now(),
 	})
+}
+
+func (k *Kafka) Ping() error {
+	for _, broker := range k.Brokers {
+		conn, err := net.Dial("tcp", broker)
+		if err != nil {
+			return err
+		}
+		defer conn.Close()
+	}
+	return nil
 }

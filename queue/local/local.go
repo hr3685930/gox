@@ -54,3 +54,7 @@ func (l *LocalMQ) Err(failed queue.FailedJobs) {
 func (l *LocalMQ) Close() {
 
 }
+
+func (l *LocalMQ) Ping() error {
+	return nil
+}

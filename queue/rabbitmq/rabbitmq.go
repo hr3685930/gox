@@ -289,3 +289,12 @@ func (r *RabbitMQ) ExportErr(err error, d amqp.Delivery) {
 		FiledAt:    carbon.Now(),
 	})
 }
+
+func (r *RabbitMQ) Ping() error {
+	conn, err := amqp.Dial(r.MQUrl)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	return nil
+}

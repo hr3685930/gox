@@ -9,21 +9,23 @@ import (
 )
 
 type Redis struct {
+	address string
 	*rd.Client
 }
 
 // New creates an instance of Redis cache driver
 func New(addr, port string, db int, pass string) (*Redis, error) {
+	address := addr + ":" + port
 	conn := rd.NewClient(&rd.Options{
-		Addr:     addr + ":" + port,
+		Addr:     address,
 		DB:       db,
 		Password: pass,
 	})
 
-	if _, err := net.Dial("tcp", addr+":"+port); err != nil {
+	if _, err := net.Dial("tcp", address); err != nil {
 		return nil, err
 	}
-	return &Redis{conn}, nil
+	return &Redis{address: address, Client: conn}, nil
 }
 
 // Contains checks if cached key exists in Redis storage
@@ -75,4 +77,13 @@ func (r *Redis) Save(ctx context.Context, key string, value string, lifeTime tim
 
 func (r *Redis) AddTracingHook() {
 	r.AddHook(NewHook())
+}
+
+func (r *Redis) Ping() error {
+	conn, err := net.Dial("tcp", r.address)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+	return nil
 }

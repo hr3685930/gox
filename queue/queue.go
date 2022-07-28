@@ -23,6 +23,8 @@ type Queue interface {
 	Consumer(topic, queue string, job JobBase, sleep, retry, timeout int32) error
 	// Err report
 	Err(failed FailedJobs)
+	// Ping Ping
+	Ping() error
 
 	Close()
 }

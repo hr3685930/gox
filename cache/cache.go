@@ -41,7 +41,10 @@ type Cache interface {
     // Save cache a value by key
     Save(ctx context.Context, key string, value string, lifeTime time.Duration) error
 
-    //AddTracingHook Hook
+    // AddTracingHook Hook
     AddTracingHook()
+
+    // Ping ping
+    Ping() error
 }
 

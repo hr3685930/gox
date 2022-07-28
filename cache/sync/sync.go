@@ -123,3 +123,7 @@ func (sm *syncMap) Save(ctx context.Context, key string, value string, lifeTime 
 func (sm *syncMap) AddTracingHook() {
 
 }
+
+func (sm *syncMap) Ping() error {
+	return nil
+}
