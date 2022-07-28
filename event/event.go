@@ -17,7 +17,12 @@ import (
 
 const DefaultSource = "https://github.com/hr3685930/pkg/event/sender"
 
-var EventErr = make(chan error, 1)
+var EventErrs = make(chan *EventErr, 1)
+
+type EventErr struct {
+	Err   error
+	Event cloudevents.Event
+}
 
 type CEfn func(ctx context.Context, event cloudevents.Event) protocol.Result
 
@@ -35,11 +40,15 @@ type CloudEvent interface {
 func NewHttpEvent(endpoint string, eventName string) *Event {
 	httpEvent, err := http.NewHTTPEvent(endpoint)
 	if err != nil {
-		EventErr <- errors.Errorf("%+v\n", err)
+		EventErrs <- &EventErr{
+			Err: errors.Errorf("%+v\n", err),
+		}
 	}
 	UUID, err := uuid.GenerateUUID()
 	if err != nil {
-		EventErr <- errors.Errorf("%+v\n", err)
+		EventErrs <- &EventErr{
+			Err: errors.Errorf("%+v\n", err),
+		}
 	}
 	httpEvent.SetCloudEventID(UUID)
 	httpEvent.SetCloudEventType(eventName)
@@ -64,11 +73,15 @@ func NewHTTPReceive(ctx context.Context, fn CEfn) (*client.EventReceiver, error)
 func NewKafkaEvent(topic string, eventName string) *Event {
 	kafkaEvent, err := kafka.NewKafkaEvent(topic)
 	if err != nil {
-		EventErr <- errors.Errorf("%+v\n", err)
+		EventErrs <- &EventErr{
+			Err: errors.Errorf("%+v\n", err),
+		}
 	}
 	UUID, err := uuid.GenerateUUID()
 	if err != nil {
-		EventErr <- errors.Errorf("%+v\n", err)
+		EventErrs <- &EventErr{
+			Err: errors.Errorf("%+v\n", err),
+		}
 	}
 	kafkaEvent.SetCloudEventID(UUID)
 	kafkaEvent.SetCloudEventType(eventName)
@@ -96,11 +109,15 @@ func NewKafkaReceiver(ctx context.Context, topic, group string, fn CEfn) error {
 func NewChannelEvent(eventName string) *Event {
 	ch, err := gochan.NewChannelEvent()
 	if err != nil {
-		EventErr <- errors.Errorf("%+v\n", err)
+		EventErrs <- &EventErr{
+			Err: errors.Errorf("%+v\n", err),
+		}
 	}
 	UUID, err := uuid.GenerateUUID()
 	if err != nil {
-		EventErr <- errors.Errorf("%+v\n", err)
+		EventErrs <- &EventErr{
+			Err: errors.Errorf("%+v\n", err),
+		}
 	}
 	ch.SetCloudEventID(UUID)
 	ch.SetCloudEventType(eventName)
@@ -128,7 +145,9 @@ func NewRpcEvent(endpoint, eventName string) *Event {
 	r := event.NewRpcEvent(endpoint, eventName)
 	UUID, err := uuid.GenerateUUID()
 	if err != nil {
-		EventErr <- errors.Errorf("%+v\n", err)
+		EventErrs <- &EventErr{
+			Err: errors.Errorf("%+v\n", err),
+		}
 	}
 	r.SetCloudEventID(UUID)
 	r.SetCloudEventType(eventName)
