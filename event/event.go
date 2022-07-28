@@ -2,7 +2,6 @@ package event
 
 import (
 	"context"
-	"github.com/Shopify/sarama"
 	"github.com/cloudevents/sdk-go/protocol/kafka_sarama/v2"
 	cloudevents "github.com/cloudevents/sdk-go/v2"
 	"github.com/cloudevents/sdk-go/v2/client"
@@ -77,8 +76,8 @@ func NewKafkaEvent(topic string, eventName string) *Event {
 	return &Event{CloudEvent: kafkaEvent}
 }
 
-func NewKafkaReceiver(ctx context.Context, client sarama.Client, topic, group string, fn CEfn) error {
-	consumer := kafka_sarama.NewConsumerFromClient(client, group, topic)
+func NewKafkaReceiver(ctx context.Context, topic, group string, fn CEfn) error {
+	consumer := kafka_sarama.NewConsumerFromClient(kafka.EventClient, group, topic)
 	c, err := cloudevents.NewClient(consumer)
 	if err != nil {
 		return err
