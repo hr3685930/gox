@@ -16,6 +16,7 @@ type Opt struct {
 	ProjectName string
 	IsSentry    bool
 	IsTrace     bool
+	IsMetric    bool
 	QueueDrive  string
 	CacheDrive  string
 	DBDrive     string
@@ -71,6 +72,10 @@ func Create(c *cli.Context) {
 	}
 
 	if c.String("trace") == "jaeger" {
+		opts.IsTrace = true
+	}
+
+	if c.String("metric") == "prom" {
 		opts.IsTrace = true
 	}
 	CreateProject(opts, pwd)
@@ -176,6 +181,9 @@ func CreateProject(opts *Opt, pwd string) {
 		SimpleCreate(initBootDir+"/http.go", TplDir+"/init/boot/http.tpl", opts)
 	} else {
 		SimpleCreate(initBootDir+"/grpc.go", TplDir+"/init/boot/grpc.tpl", opts)
+	}
+	if opts.IsMetric {
+		SimpleCreate(initBootDir+"/metric.go", TplDir+"/init/boot/metric.tpl", opts)
 	}
 
 	// commands

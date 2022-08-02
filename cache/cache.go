@@ -22,6 +22,10 @@ func AddTracingHook() {
     Cached.AddTracingHook()
 }
 
+func AddMetricHook() {
+    Cached.AddMetricHook()
+}
+
 type Cache interface {
     // Contains check if a cached key exists
     Contains(ctx context.Context, key string) bool
