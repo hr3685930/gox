@@ -76,7 +76,7 @@ func Create(c *cli.Context) {
 	}
 
 	if c.String("metric") == "prom" {
-		opts.IsTrace = true
+		opts.IsMetric = true
 	}
 	CreateProject(opts, pwd)
 	TryErr(os.RemoveAll(".goo"))
