@@ -64,11 +64,11 @@ func (k *Kafka) Connect() error {
 }
 
 func (k *Kafka) ProducerConnect() queue.Queue {
-	return &Kafka{Cli: k.Cli, Prefix: k.Prefix, ProducerTopic: k.ProducerTopic, ConsumerTopics: k.ConsumerTopics, Brokers: k.Brokers}
+	return k
 }
 
 func (k *Kafka) ConsumerConnect() queue.Queue {
-	return &Kafka{Cli: k.Cli, Prefix: k.Prefix, ProducerTopic: k.ProducerTopic, ConsumerTopics: k.ConsumerTopics, Brokers: k.Brokers}
+	return k
 }
 
 func (k *Kafka) Topic(topic string) {

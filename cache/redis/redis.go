@@ -76,7 +76,14 @@ func (r *Redis) Save(ctx context.Context, key string, value string, lifeTime tim
 }
 
 func (r *Redis) AddTracingHook() {
-	r.AddHook(NewHook())
+	r.AddHook(NewTraceHook())
+}
+
+func (r *Redis) AddMetricHook() {
+	r.AddHook(NewMetricHook(
+		WithInstanceName("cache"),
+		WithDurationBuckets([]float64{.001, .005, .01}),
+	))
 }
 
 func (r *Redis) Ping() error {

@@ -30,6 +30,7 @@ type Consumers []*Consumer
 
 func NewConsumer(topic string, consumers Consumers) {
 	ErrJob = make(chan FailedJobs, 1)
+	ch := make(chan int, 1)
 	for _, consumer := range consumers {
 		consumer := consumer
 		go func() {
@@ -37,7 +38,7 @@ func NewConsumer(topic string, consumers Consumers) {
 			_ = mq.Consumer(topic, consumer.Queue, consumer.Job, consumer.Sleep, consumer.Retry, consumer.Timeout)
 		}()
 	}
-
+	<- ch
 }
 
 // NewProducer 生产消息

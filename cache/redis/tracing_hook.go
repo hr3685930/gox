@@ -11,13 +11,13 @@ import (
 	"strings"
 )
 
-type hook struct{}
+type tracingHook struct{}
 
-func NewHook() redis.Hook {
-	return &hook{}
+func NewTraceHook() redis.Hook {
+	return &tracingHook{}
 }
 
-func (h *hook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
+func (h *tracingHook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Context, error) {
 	span, _ := opentracing.StartSpanFromContext(ctx, getCmdName(cmd))
 	ext.DBType.Set(span, "db.redis")
 	ext.DBStatement.Set(span, fmt.Sprintf("%v", cmd.Args()))
@@ -25,7 +25,7 @@ func (h *hook) BeforeProcess(ctx context.Context, cmd redis.Cmder) (context.Cont
 
 }
 
-func (h *hook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
+func (h *tracingHook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 	v, ok := ctx.Value(cmd).(opentracing.Span)
 	if ok {
 		v.Finish()
@@ -35,7 +35,7 @@ func (h *hook) AfterProcess(ctx context.Context, cmd redis.Cmder) error {
 	}
 }
 
-func (h *hook) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmder) (context.Context, error) {
+func (h *tracingHook) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmder) (context.Context, error) {
 	pipelineSpan, _ := opentracing.StartSpanFromContext(ctx, "redis-pipeline")
 	ext.DBType.Set(pipelineSpan, "db.redis")
 	var buffer bytes.Buffer
@@ -54,7 +54,7 @@ func (h *hook) BeforeProcessPipeline(ctx context.Context, cmds []redis.Cmder) (c
 	return context.WithValue(ctx, cmds[0], pipelineSpan), nil
 }
 
-func (h *hook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder) error {
+func (h *tracingHook) AfterProcessPipeline(ctx context.Context, cmds []redis.Cmder) error {
 	v, ok := ctx.Value(cmds[0]).(opentracing.Span)
 	if ok {
 		v.Finish()

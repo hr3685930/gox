@@ -124,6 +124,10 @@ func (sm *syncMap) AddTracingHook() {
 
 }
 
+func (sm *syncMap) AddMetricHook() {
+
+}
+
 func (sm *syncMap) Ping() error {
 	return nil
 }

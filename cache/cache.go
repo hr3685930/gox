@@ -44,6 +44,9 @@ type Cache interface {
     // AddTracingHook Hook
     AddTracingHook()
 
+    // AddMetricHook Hook
+    AddMetricHook()
+
     // Ping ping
     Ping() error
 }
