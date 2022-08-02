@@ -24,8 +24,12 @@ func main() {
 			Usage: "链路,支持jaeger",
 		},
 		cli.StringFlag{
+			Name:  "metric",
+			Usage: "监控,支持prom",
+		},
+		cli.StringFlag{
 			Name:  "db",
-			Usage: "数据库,支持mysql,postgre,clickhouse",
+			Usage: "数据库,支持mysql,postgre,clickhouse,sqlite",
 		},
 		cli.StringFlag{
 			Name:  "queue",
