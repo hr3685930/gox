@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
+	sentinelPlugin "github.com/sentinel-group/sentinel-go-adapters/gin"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -92,5 +93,12 @@ func TimeoutMiddleware(duration time.Duration) gin.HandlerFunc {
 		timeout.WithResponse(func(c *gin.Context) {
 			c.JSON(http.StatusGatewayTimeout, gin.H{"code": 5504, "message": "status gateway timeout"})
 		}),
+	)
+}
+
+// GovernanceMiddleware service governance middleware
+func GovernanceMiddleware(fn func(ctx *gin.Context)) gin.HandlerFunc {
+	return sentinelPlugin.SentinelMiddleware(
+		sentinelPlugin.WithBlockFallback(fn),
 	)
 }

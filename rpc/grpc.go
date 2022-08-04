@@ -3,7 +3,9 @@ package rpc
 import (
 	"context"
 	"fmt"
+	"github.com/alibaba/sentinel-golang/core/base"
 	"github.com/pkg/errors"
+	sentinel "github.com/sentinel-group/sentinel-go-adapters/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
@@ -52,7 +54,6 @@ func (h *GrpcError) Error() string {
 func (h *GrpcError) GetStack() string {
 	return string(h.Stack)
 }
-
 
 type ErrorReport func(md metadata.MD, req interface{}, stack string, resp *status.Status)
 
@@ -133,4 +134,20 @@ func UnaryTimeoutInterceptor(timeout time.Duration) grpc.UnaryServerInterceptor 
 			return nil, err
 		}
 	}
+}
+
+func UnaryGovernanceClientInterceptor(err error) grpc.UnaryClientInterceptor {
+	return sentinel.NewUnaryClientInterceptor(
+		sentinel.WithUnaryClientBlockFallback(func(ctx context.Context, s string, i interface{}, conn *grpc.ClientConn, blockError *base.BlockError) error {
+			return err
+		}),
+	)
+}
+
+func UnaryGovernanceServerInterceptor(err error) grpc.UnaryServerInterceptor {
+	return sentinel.NewUnaryServerInterceptor(
+		sentinel.WithUnaryServerBlockFallback(func(ctx context.Context, i interface{}, info *grpc.UnaryServerInfo, blockError *base.BlockError) (interface{}, error) {
+			return nil, err
+		}),
+	)
 }
