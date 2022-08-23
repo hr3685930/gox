@@ -167,6 +167,7 @@ func CreateProject(opts *Opt, pwd string) {
 	SimpleCreate(initBootDir+"/command.go", TplDir+"/init/boot/command.tpl", opts)
 	SimpleCreate(initBootDir+"/config.go", TplDir+"/init/boot/config.tpl", opts)
 	SimpleCreate(initBootDir+"/database.go", TplDir+"/init/boot/database.tpl", opts)
+	SimpleCreate(initBootDir+"/governance.go", TplDir+"/init/boot/governance.tpl", opts)
 	SimpleCreate(initBootDir+"/log.go", TplDir+"/init/boot/log.tpl", opts)
 	SimpleCreate(initBootDir+"/queue.go", TplDir+"/init/boot/queue.tpl", opts)
 	SimpleCreate(initBootDir+"/signal.go", TplDir+"/init/boot/signal.tpl", opts)
