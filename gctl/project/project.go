@@ -21,6 +21,7 @@ type Opt struct {
 	CacheDrive  string
 	DBDrive     string
 	ServiceType string
+	IsDB        bool
 }
 
 func Create(c *cli.Context) {
@@ -53,7 +54,7 @@ func Create(c *cli.Context) {
 	opts.IsSentry = false
 	opts.CacheDrive = "sync"
 	opts.QueueDrive = "local"
-	opts.DBDrive = "sqlite"
+	opts.IsDB = false
 
 	if c.String("cache") != "" {
 		opts.CacheDrive = c.String("cache")
@@ -65,6 +66,7 @@ func Create(c *cli.Context) {
 
 	if c.String("db") != "" {
 		opts.DBDrive = c.String("db")
+		opts.IsDB = true
 	}
 
 	if c.String("err") == "sentry" {
@@ -153,7 +155,9 @@ func CreateProject(opts *Opt, pwd string) {
 	SimpleCreate(configDir+"/app.go", TplDir+"/configs/app.tpl", opts)
 	SimpleCreate(configDir+"/cache.go", TplDir+"/configs/cache.tpl", opts)
 	SimpleCreate(configDir+"/conf.go", TplDir+"/configs/conf.tpl", opts)
-	SimpleCreate(configDir+"/database.go", TplDir+"/configs/database.tpl", opts)
+	if opts.IsDB {
+		SimpleCreate(configDir+"/database.go", TplDir+"/configs/database.tpl", opts)
+	}
 	SimpleCreate(configDir+"/queue.go", TplDir+"/configs/queue.tpl", opts)
 	if opts.IsTrace {
 		SimpleCreate(configDir+"/trace.go", TplDir+"/configs/trace.tpl", opts)
@@ -166,7 +170,9 @@ func CreateProject(opts *Opt, pwd string) {
 	SimpleCreate(initBootDir+"/cache.go", TplDir+"/init/boot/cache.tpl", opts)
 	SimpleCreate(initBootDir+"/command.go", TplDir+"/init/boot/command.tpl", opts)
 	SimpleCreate(initBootDir+"/config.go", TplDir+"/init/boot/config.tpl", opts)
-	SimpleCreate(initBootDir+"/database.go", TplDir+"/init/boot/database.tpl", opts)
+	if opts.DBDrive != "" {
+		SimpleCreate(initBootDir+"/database.go", TplDir+"/init/boot/database.tpl", opts)
+	}
 	SimpleCreate(initBootDir+"/governance.go", TplDir+"/init/boot/governance.tpl", opts)
 	SimpleCreate(initBootDir+"/log.go", TplDir+"/init/boot/log.tpl", opts)
 	SimpleCreate(initBootDir+"/queue.go", TplDir+"/init/boot/queue.tpl", opts)
@@ -290,14 +296,14 @@ func CreateProject(opts *Opt, pwd string) {
 	if isGitignore {
 		fmt.Println("you need add config.yaml\nsqlite.db\n to .gitignore")
 	} else {
-		fmt.Println("gitignore文件不存在, 正在创建gitignore")
+		fmt.Println("gitignore not found, creating gitignore...")
 		SimpleCreate(pwd+"/.gitignore", TplDir+"/.gitignore.tpl", opts)
 	}
 
 	// 检查是否存在go.mod
 	isMod := CheckFile("go.mod")
 	if !isMod {
-		fmt.Println("mod文件不存在, 正在创建mod.go")
+		fmt.Println("mod not found, creating mod.go...")
 		TryErr(ExecShell("go mod init " + opts.ProjectName))
 	}
 
