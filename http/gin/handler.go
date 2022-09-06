@@ -45,9 +45,11 @@ type HTTPErrorReport func(HTTPCode int, response gin.H, stack string, c *gin.Con
 
 func ErrHandler(errorReport HTTPErrorReport) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		bodyBytes, _ := ioutil.ReadAll(c.Request.Body)
-		c.Set("jsonBody", string(bodyBytes))
-		c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+		if c.Request.Body != nil  {
+			bodyBytes, _ := ioutil.ReadAll(c.Request.Body)
+			c.Set("jsonBody", string(bodyBytes))
+			c.Request.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+		}
 		c.Next()
 		if length := len(c.Errors); length > 0 {
 			err := c.Errors[length-1].Err
