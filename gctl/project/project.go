@@ -286,6 +286,9 @@ func CreateProject(opts *Opt, pwd string) {
 	SimpleCreate(testDir+"/main_test.go", TplDir+"/test/main_test.tpl", opts)
 	if opts.ServiceType != "api" {
 		SimpleCreate(testDir+"/grpc.go", TplDir+"/test/grpc.tpl", opts)
+		SimpleCreate(testDir+"/health_test.go", TplDir+"/test/health_test.tpl", opts)
+	} else {
+		SimpleCreate(testDir+"/ping_test.go", TplDir+"/test/ping_test.tpl", opts)
 	}
 
 	// root
