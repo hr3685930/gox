@@ -273,6 +273,10 @@ func CreateProject(opts *Opt, pwd string) {
 	TryErr(os.MkdirAll(utilsFormatDir, os.ModePerm))
 	SimpleCreate(utilsFormatDir+"/datacodec.go", TplDir+"/internal/utils/format/datacodec.tpl", opts)
 	SimpleCreate(utilsFormatDir+"/protobuf.go", TplDir+"/internal/utils/format/protobuf.tpl", opts)
+	// utils client
+	utilsClientDir := pwd + "/internal/utils/client"
+	TryErr(os.MkdirAll(utilsClientDir, os.ModePerm))
+	SimpleCreate(utilsFormatDir+"/api.go", TplDir+"/internal/utils/client/api.tpl", opts)
 
 	// log
 	storageDir := pwd + "/storage/log"
