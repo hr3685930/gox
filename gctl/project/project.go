@@ -276,7 +276,7 @@ func CreateProject(opts *Opt, pwd string) {
 	// utils client
 	utilsClientDir := pwd + "/internal/utils/client"
 	TryErr(os.MkdirAll(utilsClientDir, os.ModePerm))
-	SimpleCreate(utilsFormatDir+"/api.go", TplDir+"/internal/utils/client/api.tpl", opts)
+	SimpleCreate(utilsClientDir+"/api.go", TplDir+"/internal/utils/client/api.tpl", opts)
 
 	// log
 	storageDir := pwd + "/storage/log"
