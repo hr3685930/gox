@@ -258,7 +258,11 @@ func CreateProject(opts *Opt, pwd string) {
 	//repo
 	repoDir := pwd + "/internal/repo"
 	TryErr(os.MkdirAll(repoDir, os.ModePerm))
-	SimpleCreate(repoDir+"/repo.go", TplDir+"/internal/repo/repo.tpl", opts)
+
+	//service
+	serviceDir := pwd + "/internal/service"
+	TryErr(os.MkdirAll(serviceDir, os.ModePerm))
+	SimpleCreate(serviceDir+"/context.go", TplDir+"/internal/service/context.tpl", opts)
 
 	// types
 	typesDir := pwd + "/internal/types"
