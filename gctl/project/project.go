@@ -144,6 +144,8 @@ func CreateProject(opts *Opt, pwd string) {
 	TryErr(os.Mkdir(apiDir, os.ModePerm))
 	TryErr(os.MkdirAll(apiDir+"/proto/v1/cloudevent", os.ModePerm))
 	SimpleCreate(apiDir+"/proto/v1/cloudevent/cloudevent.proto", TplDir+"/api/proto/v1/cloudevent/cloudevent.proto", opts)
+	TryErr(os.MkdirAll(apiDir+"/proto/v1/common", os.ModePerm))
+	SimpleCreate(apiDir+"/proto/v1/common/page.proto", TplDir+"/api/proto/v1/common/page.proto", opts)
 	if opts.ServiceType == "rpc" {
 		TryErr(os.MkdirAll(apiDir+"/proto/v1/example", os.ModePerm))
 		SimpleCreate(apiDir+"/proto/v1/example/example.proto", TplDir+"/api/proto/v1/example/example.proto", opts)
@@ -272,6 +274,7 @@ func CreateProject(opts *Opt, pwd string) {
 	utilsDir := pwd + "/internal/utils"
 	TryErr(os.MkdirAll(utilsDir, os.ModePerm))
 	SimpleCreate(utilsDir+"/kafka.go", TplDir+"/internal/utils/kafka.tpl", opts)
+	SimpleCreate(utilsDir+"/page.go", TplDir+"/internal/utils/page.tpl", opts)
 	// utils format
 	utilsFormatDir := pwd + "/internal/utils/format"
 	TryErr(os.MkdirAll(utilsFormatDir, os.ModePerm))
@@ -319,6 +322,7 @@ func CreateProject(opts *Opt, pwd string) {
 	}
 
 	TryErr(ExecShell("protoc --go_out=plugins=grpc:. api/proto/v1/cloudevent/*.proto"))
+	TryErr(ExecShell("protoc --go_out=plugins=grpc:. api/proto/v1/common/*.proto"))
 	TryErr(ExecShell("go mod tidy -compat=1.17"))
 }
 
