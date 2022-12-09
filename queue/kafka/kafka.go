@@ -18,8 +18,6 @@ var message chan *msgFuncOpt
 
 type msgFuncOpt struct {
 	ConsumerGroupHandler *consumerGroupHandler
-	Sess                 sarama.ConsumerGroupSession
-	Claim                sarama.ConsumerGroupClaim
 	Msg                  *sarama.ConsumerMessage
 }
 
@@ -112,12 +110,12 @@ func (k *Kafka) Consumer(topic, queueBaseName string, job queue.JobBase, sleep, 
 	if err != nil {
 		return err
 	}
-	message = make(chan *msgFuncOpt, 1)
+	message = make(chan *msgFuncOpt, 0)
 	go func() {
 		for {
 			select {
 			case opt := <-message:
-				ConsumerHandler(opt.ConsumerGroupHandler, opt.Sess, opt.Claim, opt.Msg)
+				ConsumerHandler(opt.ConsumerGroupHandler, opt.Msg)
 			}
 		}
 	}()
@@ -159,16 +157,16 @@ func (c *consumerGroupHandler) Cleanup(_ sarama.ConsumerGroupSession) error {
 // ConsumeClaim 此方法调用次数 = patation数 此方法需要顺序执行
 func (c *consumerGroupHandler) ConsumeClaim(sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim) error {
 	for msg := range claim.Messages() {
-		message <- &msgFuncOpt{c, sess, claim, msg}
+		sess.MarkMessage(msg, "")
+		message <- &msgFuncOpt{c, msg}
 	}
 	return nil
 }
 
-func ConsumerHandler(c *consumerGroupHandler, sess sarama.ConsumerGroupSession, claim sarama.ConsumerGroupClaim, msg *sarama.ConsumerMessage) {
+func ConsumerHandler(c *consumerGroupHandler, msg *sarama.ConsumerMessage) {
 	err := json.Unmarshal(msg.Value, c.Job)
 	if err != nil {
 		c.k.ExportErr(queue.Err(err), string(msg.Value), c.GroupID)
-		sess.MarkMessage(msg, "")
 		return
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.TimeOut)*time.Second)
@@ -199,7 +197,6 @@ func ConsumerHandler(c *consumerGroupHandler, sess sarama.ConsumerGroupSession, 
 				}
 				return nil, handlerErr
 			})
-			sess.MarkMessage(msg, "")
 		})
 		cancel()
 		return
@@ -213,7 +210,6 @@ func ConsumerHandler(c *consumerGroupHandler, sess sarama.ConsumerGroupSession, 
 		}
 		return nil, handlerErr
 	})
-	sess.MarkMessage(msg, "")
 	cancel()
 }
 
